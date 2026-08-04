@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
-using AiHUD.Models;
+using AiDaBenYing.Models;
 
-namespace AiHUD.Services;
+namespace AiDaBenYing.Services;
 
 public class AppLauncherService
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 
-namespace AiHUD.Converters;
+namespace AiDaBenYing.Converters;
 
 public class BoolToVisibilityConverter : IValueConverter
 {
@@ -146,8 +146,8 @@ public class MoveAppConverter : IMultiValueConverter
         if (values.Length != 2)
             return null!;
 
-        var targetCategory = values[0] as AiHUD.Models.Category;
-        var appItem = values[1] as AiHUD.Models.AppItem;
+        var targetCategory = values[0] as AiDaBenYing.Models.Category;
+        var appItem = values[1] as AiDaBenYing.Models.AppItem;
 
         if (targetCategory != null && appItem != null)
         {
@@ -165,8 +165,8 @@ public class MoveAppConverter : IMultiValueConverter
 
 public class MoveAppParameter
 {
-    public AiHUD.Models.Category? TargetCategory { get; set; }
-    public AiHUD.Models.AppItem? AppItem { get; set; }
+    public AiDaBenYing.Models.Category? TargetCategory { get; set; }
+    public AiDaBenYing.Models.AppItem? AppItem { get; set; }
 }
 
 public class StringToInitialsConverter : IValueConverter
@@ -187,6 +187,30 @@ public class StringToInitialsConverter : IValueConverter
             return name.ToUpperInvariant();
         }
         return "?";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class NullToVisibilityForIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        // parameter "initials" means: show initials when icon is null (invert logic)
+        bool showInitials = parameter?.ToString()?.ToLower() == "initials";
+        bool hasIcon = value != null;
+
+        if (showInitials)
+        {
+            return hasIcon ? Visibility.Collapsed : Visibility.Visible;
+        }
+        else
+        {
+            return hasIcon ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

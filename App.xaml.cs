@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace AiHUD;
+namespace AiDaBenYing;
 
 public partial class App : Application
 {

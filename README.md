@@ -1,4 +1,4 @@
-# AI Hub - AI工具管理器
+# AI大本营
 
 一个使用 WPF 和 Material Design 开发的 AI 工具分类管理桌面应用程序。
 
@@ -33,7 +33,9 @@ AiHUD/
 ├── Views/               # 视图
 │   ├── MainWindow.xaml
 │   ├── AddCategoryDialog.xaml
-│   └── EditAppDialog.xaml
+│   ├── EditCategoryDialog.xaml
+│   ├── EditAppDialog.xaml
+│   └── MoveAppDialog.xaml
 ├── Services/            # 服务层
 │   ├── DataService.cs
 │   └── AppLauncherService.cs
@@ -60,13 +62,14 @@ dotnet run
 2. **添加应用**: 选择分类后，点击"添加应用"按钮选择 .exe 文件
 3. **启动应用**: 双击应用卡片即可启动程序
 4. **编辑应用**: 右键点击应用卡片，选择"编辑"修改信息
-5. **切换主题**: 点击左下角"切换主题"按钮
+5. **移动应用**: 右键点击应用卡片，选择"移动到"转移分类
+6. **切换主题**: 点击左下角"切换主题"按钮
 
 ## 数据存储
 
 应用数据存储在:
 ```
-%LOCALAPPDATA%\AiHUD\data.json
+%LOCALAPPDATA%\AiDaBenYing\data.json
 ```
 
 ## 界面预览

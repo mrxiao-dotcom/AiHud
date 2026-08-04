@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 
-namespace AiHUD.Models;
+namespace AiDaBenYing.Models;
 
 public static class IconExtractor
 {

@@ -2,11 +2,11 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using AiHUD.Models;
-using AiHUD.ViewModels;
+using AiDaBenYing.Models;
+using AiDaBenYing.ViewModels;
 using MaterialDesignThemes.Wpf;
 
-namespace AiHUD.Views;
+namespace AiDaBenYing.Views;
 
 public partial class MainWindow : Window
 {
@@ -89,6 +89,45 @@ public partial class MainWindow : Window
         if (result is AddCategoryDialog addDialog && !string.IsNullOrEmpty(addDialog.CategoryName))
         {
             _viewModel.AddCategory(addDialog.CategoryName, addDialog.CategoryIcon, addDialog.CategoryColor);
+        }
+    }
+
+    private async void EditCategory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menuItem && menuItem.DataContext is Category category)
+        {
+            var dialog = new EditCategoryDialog(category);
+            await DialogHost.Show(dialog, "RootDialog");
+            await _viewModel.SaveDataAsync();
+        }
+    }
+
+    private async void DeleteCategory_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menuItem && menuItem.DataContext is Category category)
+        {
+            if (category.AppItems.Count > 0)
+            {
+                var result = MessageBox.Show(
+                    $"分类 \"{category.Name}\" 中有 {category.AppItems.Count} 个应用，删除分类后这些应用也会被删除。\n\n确定要删除吗？",
+                    "确认删除",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes) return;
+            }
+            else
+            {
+                var result = MessageBox.Show(
+                    $"确定要删除分类 \"{category.Name}\" 吗？",
+                    "确认删除",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes) return;
+            }
+
+            _viewModel.DeleteCategory(category);
         }
     }
 

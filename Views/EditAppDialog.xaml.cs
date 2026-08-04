@@ -1,11 +1,11 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using AiHUD.Models;
+using AiDaBenYing.Models;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 
-namespace AiHUD.Views;
+namespace AiDaBenYing.Views;
 
 public partial class EditAppDialog : UserControl
 {
@@ -59,6 +59,9 @@ public partial class EditAppDialog : UserControl
         AppItem.ExecutablePath = ExecutablePathTextBox.Text.Trim();
         AppItem.Arguments = ArgumentsTextBox.Text.Trim();
         AppItem.Description = DescriptionTextBox.Text.Trim();
+
+        // 重新加载图标
+        AppItem.RefreshIcon();
 
         DialogHost.CloseDialogCommand.Execute(this, this);
     }

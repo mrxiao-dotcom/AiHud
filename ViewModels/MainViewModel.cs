@@ -5,14 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using AiHUD.Converters;
-using AiHUD.Models;
-using AiHUD.Services;
+using AiDaBenYing.Converters;
+using AiDaBenYing.Models;
+using AiDaBenYing.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 
-namespace AiHUD.ViewModels;
+namespace AiDaBenYing.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
@@ -173,12 +173,23 @@ public partial class MainViewModel : ObservableObject
                 }
             }
 
+            // 异步加载所有应用图标
+            _ = Task.Run(() => LoadAllAppIcons());
+
             // 默认显示全部应用（SelectedCategory = null）
             SelectedCategory = null;
         }
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private void LoadAllAppIcons()
+    {
+        foreach (var app in _allApps)
+        {
+            app.EnsureIconLoaded();
         }
     }
 
@@ -209,6 +220,27 @@ public partial class MainViewModel : ObservableObject
 
         Categories.Add(category);
         SelectedCategory = category;
+        _ = SaveDataAsync();
+    }
+
+    public void DeleteCategory(Category category)
+    {
+        if (category == null) return;
+
+        // 如果删除的是当前选中的分类，切换到"全部应用"
+        if (SelectedCategory == category)
+        {
+            SelectedCategory = null;
+        }
+
+        // 从 AllApps 中移除该分类下的所有应用
+        foreach (var app in category.AppItems.ToList())
+        {
+            _allApps.Remove(app);
+        }
+
+        // 从 Categories 中移除该分类
+        Categories.Remove(category);
         _ = SaveDataAsync();
     }
 
@@ -260,6 +292,7 @@ public partial class MainViewModel : ObservableObject
             System.Diagnostics.Debug.WriteLine($"[MainViewModel.AddApp] 选择文件: {exePath}, 名称: {appName}");
 
             var appItem = new AppItem(appName, exePath, null);
+            appItem.EnsureIconLoaded(); // 加载图标
             SelectedCategory.AppItems.Add(appItem);
             _allApps.Add(appItem);
 

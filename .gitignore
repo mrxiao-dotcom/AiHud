@@ -1,27 +1,14 @@
-# .NET build outputs
+# Build outputs
 bin/
 obj/
-out/
-
-# User-specific files
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
+*.cache
+
+# Logs
+*.txt
 
 # IDE
 .vs/
 .vscode/
-.idea/
-*.swp
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# NuGet
-packages/
-*.nupkg
+*.DotSettings.user

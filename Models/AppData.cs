@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AiHUD.Models;
+namespace AiDaBenYing.Models;
 
 public partial class AppData : ObservableObject
 {

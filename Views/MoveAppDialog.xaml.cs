@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using AiHUD.Models;
+using AiDaBenYing.Models;
 using MaterialDesignThemes.Wpf;
 
-namespace AiHUD.Views;
+namespace AiDaBenYing.Views;
 
 public partial class MoveAppDialog : UserControl
 {

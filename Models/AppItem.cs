@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AiHUD.Models;
+namespace AiDaBenYing.Models;
 
 public partial class AppItem : ObservableObject
 {

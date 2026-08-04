@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 
-namespace AiHUD.Views;
+namespace AiDaBenYing.Views;
 
 public partial class AddCategoryDialog : UserControl
 {

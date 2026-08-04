@@ -2,9 +2,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AiHUD.Models;
+using AiDaBenYing.Models;
 
-namespace AiHUD.Converters;
+namespace AiDaBenYing.Converters;
 
 /// <summary>
 /// 用于序列化的代理类，不包含不可序列化的 Icon 属性

@@ -5,11 +5,11 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <AssemblyName>AiHUD</AssemblyName>
-    <RootNamespace>AiHUD</RootNamespace>
-    <Title>AI Hub - AI工具管理器</Title>
-    <Company>AI Tools</Company>
-    <Product>AI Hub</Product>
+    <AssemblyName>AiDaBenYing</AssemblyName>
+    <RootNamespace>AiDaBenYing</RootNamespace>
+    <Title>AI大本营</Title>
+    <Company>AI大本营</Company>
+    <Product>AI大本营</Product>
     <Version>1.0.0</Version>
     <FileVersion>1.0.0.0</FileVersion>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
