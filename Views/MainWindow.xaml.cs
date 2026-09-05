@@ -3,8 +3,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AiDaBenYing.Models;
+using AiDaBenYing.Services;
 using AiDaBenYing.ViewModels;
 using MaterialDesignThemes.Wpf;
+using RegisterSrv.ClientSDK;
 
 namespace AiDaBenYing.Views;
 
@@ -183,6 +185,111 @@ public partial class MainWindow : Window
         {
             button.ContextMenu.DataContext = button.DataContext;
             button.ContextMenu.IsOpen = true;
+        }
+    }
+
+    /// <summary>
+    /// 打开"会员应用市场"窗口（内嵌 WebView2，访问 82.157.32.44:8888）。
+    /// 窗口本身不暴露地址栏/URL 输入框，用户无法从界面看到具体网址。
+    /// </summary>
+    private void ShowAppMarket_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // 每次点击都重新 new 窗口，关闭即销毁。WebView2 持有 GPU/网络资源，
+            // 不适合像普通 ViewModel 那样长期缓存。
+            var win = new AppMarketWindow
+            {
+                Owner = this
+            };
+            win.Show();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "无法打开应用市场：" + ex.Message +
+                "\n\n提示：本功能依赖 Edge WebView2 Runtime，请确认系统已安装最新版的 Edge 浏览器。",
+                "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ShowLicense_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // 绕开 LicenseManager 直接 new LicenseWindow，以便：
+            //  1) 把本地缓存的 KeyCode 注入进去，窗口打开即显示"已注册"
+            //  2) 弹窗关闭后能拿到 ValidatedLicenseKey 写回本地缓存
+            var cachedKey = LicenseCache.Load()?.KeyCode;
+            var serverUrl = System.Configuration.ConfigurationManager.AppSettings["LicenseServerUrl"]
+                            ?? Environment.GetEnvironmentVariable("AIHUD_LICENSE_SERVER")
+                            ?? "http://localhost:5232";
+
+            var licenseWindow = new LicenseWindow(App.AppId, "AI大本营", App.AppVersion.ToString(), serverUrl, cachedKey)
+            {
+                Owner = this
+            };
+            licenseWindow.ShowDialog();
+
+            if (licenseWindow.IsLicenseValid && !string.IsNullOrWhiteSpace(licenseWindow.ValidatedLicenseKey))
+            {
+                LicenseCache.Save(licenseWindow.ValidatedLicenseKey);
+                App.IsLicenseValid = true;
+                MessageBox.Show("注册成功，正在重新加载数据…", "AI大本营",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                _ = _viewModel.InitializeAsync();
+            }
+            else if (licenseWindow.IsLicenseValid)
+            {
+                App.IsLicenseValid = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("无法打开注册窗口：" + ex.Message, "错误",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void CheckUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            App.Updater ??= new RegisterSrv.ClientSDK.Services.UpdateClient(
+                baseUrl: System.Configuration.ConfigurationManager.AppSettings["LicenseServerUrl"]
+                         ?? "http://localhost:5232",
+                appId: App.AppId);
+
+            var status = "正在检查更新...";
+            Cursor = System.Windows.Input.Cursors.Wait;
+            var result = await App.Updater.CheckUpdateAsync(App.AppVersion.ToString());
+            Cursor = System.Windows.Input.Cursors.Arrow;
+
+            if (!result.IsSuccess)
+            {
+                MessageBox.Show($"检查更新失败：{result.Message}", "检查更新",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!result.HasUpdate || result.UpdateInfo == null)
+            {
+                MessageBox.Show("已是最新版本。", "检查更新",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var dlg = new UpdateDialog(result.UpdateInfo, App.AppVersion.ToString())
+            {
+                Owner = this
+            };
+            dlg.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            Cursor = System.Windows.Input.Cursors.Arrow;
+            MessageBox.Show("更新检查异常：" + ex.Message, "错误",
+                MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

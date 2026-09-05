@@ -387,6 +387,36 @@
                                 <TextBlock Text="切换主题" Margin="8,0,0,0"/>
                             </StackPanel>
                         </Button>
+
+                        <!-- 应用市场 -->
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Left"
+                                Click="ShowAppMarket_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Store"/>
+                                <TextBlock Text="应用市场" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- 软件注册 -->
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Left"
+                                Click="ShowLicense_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="KeyVariant"/>
+                                <TextBlock x:Name="TxtLicenseAction" Text="软件注册" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- 检查更新 -->
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                HorizontalAlignment="Left"
+                                Click="CheckUpdate_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Update"/>
+                                <TextBlock Text="检查更新" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

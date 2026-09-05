@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <AssemblyName>AiDaBenYing</AssemblyName>
@@ -19,8 +19,15 @@
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- 注册服务 SDK：复用 RegisterSrv 项目的 License/Update 能力 -->
+  <ItemGroup>
+    <ProjectReference Include="D:\CSharpProjects\RegisterSrv\src\RegisterSrv.ClientSDK\RegisterSrv.ClientSDK.csproj" />
   </ItemGroup>
 
 </Project>
