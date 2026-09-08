@@ -89,28 +89,38 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Padding" Value="20,12"/>
+        <Setter Property="MinWidth" Value="88"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid>
-                        <Border x:Name="LightShadowBorder" CornerRadius="14"
+                    <Grid MinWidth="{TemplateBinding MinWidth}">
+                        <!-- 亮阴影（左上，光源）：撑满整个按钮区域 -->
+                        <Border x:Name="LightShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="12" ShadowDepth="6" Direction="315"
-                                                  Color="#3E3E52" Opacity="0.8"/>
+                                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.8"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="DarkShadowBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}"
-                                Padding="{TemplateBinding Padding}">
+                        <!-- 暗阴影（右下） -->
+                        <Border x:Name="DarkShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="12" ShadowDepth="6" Direction="135"
-                                                  Color="#1E1E2C" Opacity="0.9"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.9"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="ContentBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}">
+                        <!-- 内容层：决定整体尺寸，有内边距 -->
+                        <Border x:Name="ContentBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
@@ -119,13 +129,13 @@
                             <Setter TargetName="LightShadowBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="16" ShadowDepth="8" Direction="315"
-                                                      Color="#3E3E52" Opacity="0.9"/>
+                                                      Color="{DynamicResource NeuroLightShadow}" Opacity="0.9"/>
                                 </Setter.Value>
                             </Setter>
                             <Setter TargetName="DarkShadowBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="16" ShadowDepth="8" Direction="135"
-                                                      Color="#1E1E2C" Opacity="0.95"/>
+                                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.95"/>
                                 </Setter.Value>
                             </Setter>
                             <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
@@ -138,7 +148,7 @@
                             <Setter TargetName="ContentBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="6" ShadowDepth="2" Direction="135"
-                                                      Color="#1E1E2C" Opacity="0.6"/>
+                                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.6"/>
                                 </Setter.Value>
                             </Setter>
                             <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
@@ -156,27 +166,34 @@
     <!-- 主按钮（强调色） -->
     <Style x:Key="NeuroPrimaryButton" TargetType="Button" BasedOn="{StaticResource NeuroButton}">
         <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
+        <Setter Property="MinWidth" Value="88"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid>
-                        <Border x:Name="LightShadowBorder" CornerRadius="14"
+                    <Grid MinWidth="{TemplateBinding MinWidth}">
+                        <Border x:Name="LightShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="315"
-                                                  Color="#3E3E52" Opacity="0.85"/>
+                                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.85"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="DarkShadowBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}"
-                                Padding="{TemplateBinding Padding}">
+                        <Border x:Name="DarkShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="135"
-                                                  Color="#1E1E2C" Opacity="0.95"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.95"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="ContentBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}">
+                        <Border x:Name="ContentBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}"
+                                Padding="{TemplateBinding Padding}">
                             <Grid>
                                 <Border CornerRadius="14"
                                         BorderBrush="{DynamicResource NeuroAccentBrush}"
@@ -190,17 +207,17 @@
                             <Setter TargetName="ContentBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="20" ShadowDepth="0" Direction="0"
-                                                      Color="#A78BFA" Opacity="0.3"/>
+                                                      Color="{DynamicResource NeuroAccent}" Opacity="0.3"/>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="Foreground" Value="#C4B5FD"/>
+                            <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="LightShadowBorder" Property="Visibility" Value="Collapsed"/>
                             <Setter TargetName="DarkShadowBorder" Property="Visibility" Value="Collapsed"/>
                             <Setter TargetName="ContentBorder" Property="Background"
                                     Value="{DynamicResource NeuroInsetBrush}"/>
-                            <Setter Property="Foreground" Value="#A78BFA"/>
+                            <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>
@@ -214,29 +231,38 @@
     <!-- 危险按钮 -->
     <Style x:Key="NeuroDangerButton" TargetType="Button" BasedOn="{StaticResource NeuroButton}">
         <Setter Property="Foreground" Value="{DynamicResource NeuroDangerBrush}"/>
+        <Setter Property="MinWidth" Value="88"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid>
-                        <Border x:Name="LightShadowBorder" CornerRadius="14"
+                    <Grid MinWidth="{TemplateBinding MinWidth}">
+                        <Border x:Name="LightShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="12" ShadowDepth="6" Direction="315"
-                                                  Color="#3E3E52" Opacity="0.8"/>
+                                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.8"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="DarkShadowBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}"
-                                Padding="{TemplateBinding Padding}">
+                        <Border x:Name="DarkShadowBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="12" ShadowDepth="6" Direction="135"
-                                                  Color="#1E1E2C" Opacity="0.9"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.9"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="ContentBorder" CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}">
+                        <Border x:Name="ContentBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{DynamicResource NeuroBackgroundBrush}"
+                                Padding="{TemplateBinding Padding}">
                             <Grid>
-                                <Border CornerRadius="14" BorderBrush="#F87171" BorderThickness="1.5" Opacity="0.5"/>
+                                <Border CornerRadius="14"
+                                        BorderBrush="{DynamicResource NeuroDangerBrush}"
+                                        BorderThickness="1.5" Opacity="0.5"/>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
@@ -246,7 +272,7 @@
                             <Setter TargetName="ContentBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="20" ShadowDepth="0" Direction="0"
-                                                      Color="#F87171" Opacity="0.3"/>
+                                                      Color="{DynamicResource NeuroDanger}" Opacity="0.3"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
@@ -312,14 +338,14 @@
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="315"
-                                                  Color="#3E3E52" Opacity="0.75"/>
+                                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.75"/>
                             </Border.Effect>
                         </Border>
                         <Border x:Name="DarkShadowBorder" CornerRadius="12"
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="135"
-                                                  Color="#1E1E2C" Opacity="0.9"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.9"/>
                             </Border.Effect>
                         </Border>
                         <Border x:Name="ContentBorder" CornerRadius="12"
@@ -333,7 +359,7 @@
                             <Setter TargetName="ContentBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="16" ShadowDepth="0" Direction="0"
-                                                      Color="#A78BFA" Opacity="0.25"/>
+                                                      Color="{DynamicResource NeuroAccent}" Opacity="0.25"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
@@ -372,11 +398,11 @@
                                 Background="{DynamicResource NeuroBackgroundBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="8" ShadowDepth="3" Direction="135"
-                                                  Color="#1E1E2C" Opacity="0.7"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.7"/>
                             </Border.Effect>
                         </Border>
                         <Border x:Name="InnerHighlight" CornerRadius="12"
-                                BorderBrush="#484860" BorderThickness="1" Opacity="0.4"/>
+                                BorderBrush="{DynamicResource NeuroBorderBrush}" BorderThickness="1" Opacity="0.4"/>
                         <Border x:Name="ContentBorder" CornerRadius="12" Padding="2,0">
                             <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
                         </Border>
@@ -389,7 +415,7 @@
                             <Setter TargetName="OuterBorder" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="10" ShadowDepth="0" Direction="0"
-                                                      Color="#A78BFA" Opacity="0.25"/>
+                                                      Color="{DynamicResource NeuroAccent}" Opacity="0.25"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
