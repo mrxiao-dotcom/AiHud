@@ -1,6 +1,6 @@
 # AI大本营
 
-一个使用 WPF 和 Material Design 开发的 AI 工具分类管理桌面应用程序。
+一个使用 WPF 和 Neumorphism（软浮雕）风格开发的 AI 工具分类管理桌面应用程序。
 
 ## 功能特性
 
@@ -31,16 +31,20 @@ AiHUD/
 ├── ViewModels/          # 视图模型
 │   └── MainViewModel.cs
 ├── Views/               # 视图
-│   ├── MainWindow.xaml
-│   ├── AddCategoryDialog.xaml
-│   ├── EditCategoryDialog.xaml
-│   ├── EditAppDialog.xaml
-│   └── MoveAppDialog.xaml
+│   ├── MainWindow.xaml      # 主窗口
+│   ├── AddCategoryDialog.xaml  # 添加分类对话框
+│   ├── EditCategoryDialog.xaml # 编辑分类对话框
+│   ├── EditAppDialog.xaml      # 编辑应用对话框
+│   ├── MoveAppDialog.xaml      # 移动应用对话框
+│   ├── AppMarketWindow.xaml    # 应用市场窗口
+│   └── UpdateDialog.xaml       # 更新对话框
 ├── Services/            # 服务层
 │   ├── DataService.cs
-│   └── AppLauncherService.cs
+│   ├── AppLauncherService.cs
+│   └── LicenseCache.cs
 ├── Converters/          # 值转换器
 │   └── Converters.cs
+├── NeumorphismTheme.xaml # Neumorphism 风格资源字典
 ├── App.xaml            # 应用配置
 └── AiHUD.csproj        # 项目文件
 ```
@@ -74,7 +78,11 @@ dotnet run
 
 ## 界面预览
 
-应用程序采用 Material Design 3 设计风格，提供现代化的用户体验：
+应用程序采用 **Neumorphism（软浮雕）设计风格**，以柔和的阴影和圆角营造出立体浮雕感：
+
+- **Neumorphism 风格**：光源从左上角照射，所有元素通过双重阴影（左亮右暗）实现凸起/凹陷效果
+- **深色主题**：背景色 #2A2A38，左上亮阴影 #3A3A4C，右下暗阴影 #1E1E28
+- **紫罗兰强调色**：#8B5CF6 主色调 + #06B6D4 青色辅助
 - 左侧导航栏显示分类列表
-- 右侧主区域以卡片形式展示应用
-- 支持深色/浅色主题切换
+- 右侧主区域以 Neumorphic 凸起卡片形式展示应用
+- 所有交互态通过阴影翻转实现真实触感反馈（按下 = 内陷）

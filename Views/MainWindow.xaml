@@ -11,13 +11,14 @@
         Height="800" Width="1200"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        Background="{StaticResource NeuroBackgroundBrush}"
+        TextElement.Foreground="{StaticResource NeuroTextBrush}"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        FontFamily="Segoe UI">
 
     <Window.Resources>
+        <!-- 转换器 -->
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
@@ -28,13 +29,21 @@
         <converters:StringToInitialsConverter x:Key="StringToInitialsConverter"/>
         <converters:NullToVisibilityForIconConverter x:Key="NullToVisibilityForIconConverter"/>
 
-        <!-- Category Item Style with Highlight -->
-        <Style x:Key="CategoryItemStyle" TargetType="Border">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="8"/>
+        <!-- ══════════════════════════════════════════════════════════════
+             NEUMORPHISM 分类条目样式
+             未选中：扁平背景；选中：凸起 + 强调色左边线
+             ══════════════════════════════════════════════════════════════ -->
+        <Style x:Key="NeuroCategoryItem" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="4,2"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{StaticResource NeuroBackgroundBrush}"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <DataTrigger Value="True">
                     <DataTrigger.Binding>
@@ -43,62 +52,83 @@
                             <Binding Path="DataContext.SelectedCategory" RelativeSource="{RelativeSource AncestorType=Window}"/>
                         </MultiBinding>
                     </DataTrigger.Binding>
-                    <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}"/>
+                    <Setter Property="Background" Value="{StaticResource NeuroHighlightBrush}"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315" Color="#8B5CF6" Opacity="0.35"/>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- All Apps Button Style with Highlight -->
-        <Style x:Key="AllAppsButtonStyle" TargetType="Border">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="8"/>
+        <!-- ══════════════════════════════════════════════════════════════
+             NEUMORPHISM "全部应用" 按钮
+             ══════════════════════════════════════════════════════════════ -->
+        <Style x:Key="NeuroAllAppsButton" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="4,2"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{StaticResource NeuroBackgroundBrush}"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedCategory}" Value="{x:Null}">
-                    <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}"/>
+                    <Setter Property="Background" Value="{StaticResource NeuroHighlightBrush}"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315" Color="#8B5CF6" Opacity="0.35"/>
+                        </Setter.Value>
+                    </Setter>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
-        <!-- App Card Template -->
+        <!-- ══════════════════════════════════════════════════════════════
+             NEUMORPHISM 应用卡片模板
+             ══════════════════════════════════════════════════════════════ -->
         <DataTemplate x:Key="AppCardTemplate">
             <Button Margin="8"
                     MinWidth="200"
                     MinHeight="70"
-                    Padding="12,8"
+                    Padding="14,10"
                     HorizontalContentAlignment="Stretch"
                     Command="{Binding DataContext.LaunchAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     CommandParameter="{Binding}"
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Style="{StaticResource NeuroAppCard}"
+                    Foreground="{StaticResource NeuroTextBrush}"
                     PreviewMouseRightButtonUp="AppButton_PreviewMouseRightButtonUp">
                 <Button.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="编辑"
-                                  Click="EditApp_Click">
+                    <ContextMenu Background="{StaticResource NeuroBackgroundBrush}"
+                                 Foreground="{StaticResource NeuroTextBrush}">
+                        <MenuItem Header="编辑" Click="EditApp_Click"
+                                  Foreground="{StaticResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="Pencil"/>
+                                <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource NeuroAccentBrush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="在文件资源管理器中显示"
-                                  Click="OpenInExplorer_Click">
+                        <MenuItem Header="在文件资源管理器中显示" Click="OpenInExplorer_Click"
+                                  Foreground="{StaticResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="FolderOpen"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator/>
-                        <MenuItem Header="移动到..."
-                                  Click="MoveApp_Click">
-                            <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="FolderMove"/>
+                                <materialDesign:PackIcon Kind="FolderOpen" Foreground="{StaticResource NeuroAccent2Brush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="删除"
-                                  Click="DeleteApp_Click">
+                        <MenuItem Header="移动到..." Click="MoveApp_Click"
+                                  Foreground="{StaticResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
+                                <materialDesign:PackIcon Kind="FolderMove" Foreground="{StaticResource NeuroAccent2Brush}"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="删除" Click="DeleteApp_Click"
+                                  Foreground="{StaticResource NeuroDangerBrush}">
+                            <MenuItem.Icon>
+                                <materialDesign:PackIcon Kind="Delete" Foreground="{StaticResource NeuroDangerBrush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
@@ -109,25 +139,31 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- App Icon -->
+                    <!-- App Icon（Neumorphic 圆形容器） -->
                     <Border Grid.Column="0"
                             Width="40" Height="40"
-                            CornerRadius="8"
-                            Background="{DynamicResource MaterialDesign.Brush.Primary.Light}"
+                            CornerRadius="12"
+                            Background="{StaticResource NeuroHighlightBrush}"
                             Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityForIconConverter}, ConverterParameter=icon}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                        </Border.Effect>
                         <Image Source="{Binding Icon}"
-                               Width="32" Height="32"
+                               Width="30" Height="30"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Border>
 
-                    <!-- Initials Fallback -->
+                    <!-- Initials Fallback（Neumorphic 容器） -->
                     <Border Grid.Column="0"
                             Width="40" Height="40"
-                            CornerRadius="8"
-                            Background="{DynamicResource MaterialDesign.Brush.Primary}"
+                            CornerRadius="12"
+                            Background="{StaticResource NeuroAccentBrush}"
                             Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityForIconConverter}, ConverterParameter=initials}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315" Color="#3A3A4C" Opacity="0.4"/>
+                        </Border.Effect>
                         <TextBlock Text="{Binding Name, Converter={StaticResource StringToInitialsConverter}}"
-                                   FontSize="14"
+                                   FontSize="13"
                                    FontWeight="Bold"
                                    Foreground="White"
                                    HorizontalAlignment="Center"
@@ -140,7 +176,7 @@
                                FontSize="15"
                                FontWeight="Medium"
                                VerticalAlignment="Center"
-                               Margin="12,0,0,0"
+                               Margin="14,0,0,0"
                                TextTrimming="CharacterEllipsis"/>
                 </Grid>
             </Button>
@@ -148,15 +184,23 @@
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <Grid>
+        <Grid Background="{StaticResource NeuroBackgroundBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Sidebar -->
+            <!-- ══════════════════════════════════════════════════════════
+                 左侧边栏
+                 ══════════════════════════════════════════════════════════ -->
             <Border Grid.Column="0"
-                    Background="{DynamicResource MaterialDesign.Brush.Background}">
+                    Background="{StaticResource NeuroBackgroundBrush}">
+                <!-- 左侧细阴影（增加层次感） -->
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Direction="0"
+                                      Color="#1E1E28" Opacity="0.3"/>
+                </Border.Effect>
+
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -165,76 +209,85 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Header -->
-                    <StackPanel Grid.Row="0" Margin="16,20,16,8">
+                    <!-- Header 区域 -->
+                    <StackPanel Grid.Row="0" Margin="20,24,20,12">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Robot"
-                                                     Width="36" Height="36"
-                                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <StackPanel Margin="12,0,0,0">
+                            <!-- Neumorphic Logo 图标 -->
+                            <Border Width="48" Height="48"
+                                    CornerRadius="14"
+                                    Background="{StaticResource NeuroAccentBrush}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="315"
+                                                      Color="#3A3A4C" Opacity="0.6"/>
+                                </Border.Effect>
+                                <materialDesign:PackIcon Kind="Robot"
+                                                         Width="28" Height="28"
+                                                         Foreground="White"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="AI大本营"
-                                           FontSize="24"
-                                           FontWeight="Bold"/>
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource NeuroTextBrush}"/>
                                 <TextBlock Text="AI工具集散地"
                                            FontSize="12"
-                                           Opacity="0.7"/>
+                                           Foreground="{StaticResource NeuroTextDimBrush}"
+                                           Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Search Box -->
-                    <TextBox Grid.Row="1"
-                             Margin="16,8,16,16"
-                             materialDesign:HintAssist.Hint="搜索应用..."
-                             materialDesign:TextFieldAssist.HasClearButton="True"
-                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
-                             materialDesign:TextFieldAssist.LeadingIcon="Magnify"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <!-- 搜索框（Neumorphic 凹陷风格） -->
+                    <Grid Grid.Row="1" Margin="16,4,16,16">
+                        <Border x:Name="SearchBorder"
+                                CornerRadius="14"
+                                Background="{StaticResource NeuroBackgroundBrush}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
+                                                  Color="#1E1E28" Opacity="0.7"/>
+                            </Border.Effect>
+                        </Border>
+                        <!-- 内高光 -->
+                        <Border CornerRadius="14"
+                                BorderBrush="#3A3A4C"
+                                BorderThickness="1"
+                                Opacity="0.3"/>
+                        <!-- 搜索图标 + 输入框 -->
+                        <Grid Margin="16,0,16,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="32"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon Grid.Column="0"
+                                                     Kind="Magnify"
+                                                     Width="20" Height="20"
+                                                     Foreground="{StaticResource NeuroTextDimBrush}"
+                                                     VerticalAlignment="Center"
+                                                     HorizontalAlignment="Center"/>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="{StaticResource NeuroTextBrush}"
+                                     CaretBrush="{StaticResource NeuroAccentBrush}"
+                                     FontSize="14"
+                                     VerticalAlignment="Center"
+                                     Padding="0,14"
+                                     materialDesign:HintAssist.Hint="搜索应用..."
+                                     materialDesign:HintAssist.Foreground="{StaticResource NeuroTextDimBrush}"
+                                     materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
+                        </Grid>
+                    </Grid>
 
-                    <!-- Categories List -->
+                    <!-- 分类列表 -->
                     <ScrollViewer Grid.Row="2"
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <!-- All Apps Button -->
-                            <Grid Margin="4,2" Cursor="Hand" MouseLeftButtonDown="AllApps_Click">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Left accent bar -->
-                                <Border x:Name="AllAppsAccentBar"
-                                        Grid.Column="0"
-                                        CornerRadius="1.5"
-                                        Width="3"
-                                        Background="Transparent">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedCategory}" Value="{x:Null}">
-                                                    <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-
-                                <!-- Button content -->
-                                <Border Grid.Column="1"
-                                        Padding="12,10"
-                                        CornerRadius="0,8,8,0">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedCategory}" Value="{x:Null}">
-                                                    <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
+                            <!-- 全部应用按钮 -->
+                            <Grid Margin="6,2" Cursor="Hand" MouseLeftButtonDown="AllApps_Click">
+                                <Border Style="{StaticResource NeuroAllAppsButton}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -246,94 +299,49 @@
                                                                  Kind="Apps"
                                                                  Width="24" Height="24"
                                                                  VerticalAlignment="Center"
-                                                                 Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                                                                 Foreground="{StaticResource NeuroAccentBrush}"/>
                                         <TextBlock Grid.Column="1"
                                                    Text="全部应用"
                                                    VerticalAlignment="Center"
                                                    Margin="12,0,0,0"
                                                    FontSize="15"
-                                                   FontWeight="Medium"/>
+                                                   FontWeight="Medium"
+                                                   Foreground="{StaticResource NeuroTextBrush}"/>
                                         <TextBlock Grid.Column="2"
                                                    Text="{Binding AllApps.Count, StringFormat='({0})'}"
                                                    VerticalAlignment="Center"
-                                                   Margin="8,0,0,0"
-                                                   Opacity="0.6"
-                                                   FontSize="12"/>
+                                                   Foreground="{StaticResource NeuroTextDimBrush}"
+                                                   FontSize="12"
+                                                   Margin="8,0,0,0"/>
                                     </Grid>
                                 </Border>
                             </Grid>
 
-                            <!-- Category Items -->
+                            <!-- 分类项目列表 -->
                             <ItemsControl x:Name="CategoriesPanel" ItemsSource="{Binding Categories}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="4,2" Cursor="Hand" MouseLeftButtonDown="CategoryItem_Click">
+                                        <Grid Margin="6,2" Cursor="Hand" MouseLeftButtonDown="CategoryItem_Click">
                                             <Grid.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="编辑分类"
-                                                              Click="EditCategory_Click">
+                                                <ContextMenu Background="{StaticResource NeuroBackgroundBrush}"
+                                                             Foreground="{StaticResource NeuroTextBrush}">
+                                                    <MenuItem Header="编辑分类" Click="EditCategory_Click"
+                                                              Foreground="{StaticResource NeuroTextBrush}">
                                                         <MenuItem.Icon>
-                                                            <materialDesign:PackIcon Kind="Pencil"/>
+                                                            <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource NeuroAccentBrush}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <Separator/>
-                                                    <MenuItem Header="删除分类"
-                                                              Click="DeleteCategory_Click">
+                                                    <MenuItem Header="删除分类" Click="DeleteCategory_Click"
+                                                              Foreground="{StaticResource NeuroDangerBrush}">
                                                         <MenuItem.Icon>
-                                                            <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
+                                                            <materialDesign:PackIcon Kind="Delete" Foreground="{StaticResource NeuroDangerBrush}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                 </ContextMenu>
                                             </Grid.ContextMenu>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="3"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
 
-                                            <!-- Left accent bar -->
-                                            <Border Grid.Column="0"
-                                                    CornerRadius="1.5"
-                                                    Width="3"
-                                                    Background="Transparent">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Value="True">
-                                                                <DataTrigger.Binding>
-                                                                    <MultiBinding Converter="{StaticResource EqualityConverter}">
-                                                                        <Binding/>
-                                                                        <Binding Path="DataContext.SelectedCategory" RelativeSource="{RelativeSource AncestorType=Window}"/>
-                                                                    </MultiBinding>
-                                                                </DataTrigger.Binding>
-                                                                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                            </Border>
-
-                                            <!-- Button content -->
-                                            <Border Grid.Column="1"
-                                                    Tag="{Binding}"
-                                                    Padding="12,10"
-                                                    CornerRadius="0,8,8,0">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Value="True">
-                                                                <DataTrigger.Binding>
-                                                                    <MultiBinding Converter="{StaticResource EqualityConverter}">
-                                                                        <Binding/>
-                                                                        <Binding Path="DataContext.SelectedCategory" RelativeSource="{RelativeSource AncestorType=Window}"/>
-                                                                    </MultiBinding>
-                                                                </DataTrigger.Binding>
-                                                                <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
+                                            <Border Style="{StaticResource NeuroCategoryItem}" Tag="{Binding}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -351,13 +359,14 @@
                                                                VerticalAlignment="Center"
                                                                Margin="12,0,0,0"
                                                                FontSize="15"
-                                                               FontWeight="Medium"/>
+                                                               FontWeight="Medium"
+                                                               Foreground="{StaticResource NeuroTextBrush}"/>
                                                     <TextBlock Grid.Column="2"
                                                                Text="{Binding AppItems.Count, StringFormat='({0})'}"
                                                                VerticalAlignment="Center"
-                                                               Margin="8,0,0,0"
-                                                               Opacity="0.6"
-                                                               FontSize="12"/>
+                                                               Foreground="{StaticResource NeuroTextDimBrush}"
+                                                               FontSize="12"
+                                                               Margin="8,0,0,0"/>
                                                 </Grid>
                                             </Border>
                                         </Grid>
@@ -365,126 +374,165 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!-- Add Category Button -->
-                            <Button Margin="16,8"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                                    Click="AddCategory_Click">
+                            <!-- 添加分类按钮（Neumorphic 凸起） -->
+                            <Button Margin="16,12"
+                                    Style="{StaticResource NeuroButton}"
+                                    Click="AddCategory_Click"
+                                    Foreground="{StaticResource NeuroAccentBrush}"
+                                    Padding="16,10">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0"/>
-                                    <TextBlock Text="添加分类"/>
+                                    <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,10,0"/>
+                                    <TextBlock Text="添加分类" FontSize="14"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Bottom Actions -->
-                    <StackPanel Grid.Row="3" Margin="16,8,16,16">
-                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                    <!-- 底部操作按钮区域 -->
+                    <StackPanel Grid.Row="3" Margin="16,8,16,20">
+                        <!-- 分隔线 -->
+                        <Border Height="1" Background="#3A3A4C" Opacity="0.4" Margin="0,0,0,16" CornerRadius="1"/>
+
+                        <Button Style="{StaticResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
-                                Command="{Binding ToggleThemeCommand}">
+                                Command="{Binding ToggleThemeCommand}"
+                                Foreground="{StaticResource NeuroTextBrush}"
+                                Padding="10,8">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ThemeLightDark"/>
-                                <TextBlock Text="切换主题" Margin="8,0,0,0"/>
+                                <materialDesign:PackIcon Kind="ThemeLightDark" Width="18" Height="18"/>
+                                <TextBlock Text="切换主题" Margin="10,0,0,0" FontSize="13"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- 应用市场 -->
-                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        <Button Style="{StaticResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
-                                Click="ShowAppMarket_Click">
+                                Click="ShowAppMarket_Click"
+                                Foreground="{StaticResource NeuroTextBrush}"
+                                Padding="10,8">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Store"/>
-                                <TextBlock Text="应用市场" Margin="8,0,0,0"/>
+                                <materialDesign:PackIcon Kind="Store" Width="18" Height="18"/>
+                                <TextBlock Text="应用市场" Margin="10,0,0,0" FontSize="13"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- 软件注册 -->
-                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        <Button Style="{StaticResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
-                                Click="ShowLicense_Click">
+                                Click="ShowLicense_Click"
+                                Foreground="{StaticResource NeuroTextBrush}"
+                                Padding="10,8">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="KeyVariant"/>
-                                <TextBlock x:Name="TxtLicenseAction" Text="软件注册" Margin="8,0,0,0"/>
+                                <materialDesign:PackIcon Kind="KeyVariant" Width="18" Height="18"/>
+                                <TextBlock x:Name="TxtLicenseAction" Text="软件注册" Margin="10,0,0,0" FontSize="13"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- 检查更新 -->
-                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        <Button Style="{StaticResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
-                                Click="CheckUpdate_Click">
+                                Click="CheckUpdate_Click"
+                                Foreground="{StaticResource NeuroTextBrush}"
+                                Padding="10,8">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Update"/>
-                                <TextBlock Text="检查更新" Margin="8,0,0,0"/>
+                                <materialDesign:PackIcon Kind="Update" Width="18" Height="18"/>
+                                <TextBlock Text="检查更新" Margin="10,0,0,0" FontSize="13"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- Divider -->
-            <Rectangle Grid.Column="0"
-                       HorizontalAlignment="Right"
-                       Width="1"
-                       Fill="{DynamicResource MaterialDesign.Brush.ForegroundLight}"/>
+            <!-- 分割线（Neumorphic 凹陷线） -->
+            <Border Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    Width="1"
+                    Background="#3A3A4C"
+                    Opacity="0.5"
+                    Margin="0,20,0,20"
+                    CornerRadius="1"/>
 
-            <!-- Main Content Area -->
+            <!-- ══════════════════════════════════════════════════════════
+                 右侧主内容区
+                 ══════════════════════════════════════════════════════════ -->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Top Bar -->
+                <!-- 顶部标题栏（Neumorphic 凸起面板） -->
                 <Border Grid.Row="0"
-                        Padding="24,16"
-                        Background="{DynamicResource MaterialDesign.Brush.Background}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        Margin="24,20,24,12"
+                        Padding="20,16">
+                    <Border CornerRadius="16"
+                            Background="{StaticResource NeuroBackgroundBrush}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                              Color="#3A3A4C" Opacity="0.5"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Category Title -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="{Binding CurrentCategoryIcon}"
-                                                     Width="32" Height="32"
-                                                     VerticalAlignment="Center"
-                                                     Foreground="{Binding CurrentCategoryColor, Converter={StaticResource StringToColorBrushConverter}}"/>
-                            <TextBlock Text="{Binding CurrentCategoryName}"
-                                       FontSize="24"
-                                       FontWeight="Bold"
-                                       VerticalAlignment="Center"
-                                       Margin="12,0,0,0"/>
-                        </StackPanel>
+                            <!-- 分类标题 -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="44" Height="44"
+                                        CornerRadius="12"
+                                        Background="{StaticResource NeuroHighlightBrush}">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315"
+                                                          Color="#3A3A4C" Opacity="0.5"/>
+                                    </Border.Effect>
+                                    <materialDesign:PackIcon Kind="{Binding CurrentCategoryIcon}"
+                                                             Width="26" Height="26"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             Foreground="{Binding CurrentCategoryColor, Converter={StaticResource StringToColorBrushConverter}}"/>
+                                </Border>
+                                <TextBlock Text="{Binding CurrentCategoryName}"
+                                           FontSize="24"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"
+                                           Margin="16,0,0,0"
+                                           Foreground="{StaticResource NeuroTextBrush}"/>
+                            </StackPanel>
 
-                        <!-- Action Buttons -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Margin="0,0,8,0"
-                                    Command="{Binding AddAppCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0"/>
-                                    <TextBlock Text="添加应用"/>
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                    Command="{Binding AddAppManuallyCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="PencilPlus" Margin="0,0,8,0"/>
-                                    <TextBlock Text="手动添加"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
+                            <!-- 操作按钮 -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- 添加应用（主按钮） -->
+                                <Button Style="{StaticResource NeuroPrimaryButton}"
+                                        Command="{Binding AddAppCommand}"
+                                        Foreground="{StaticResource NeuroAccentBrush}"
+                                        Padding="18,10"
+                                        Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                        <TextBlock Text="添加应用" FontSize="14"/>
+                                    </StackPanel>
+                                </Button>
+                                <!-- 手动添加（标准按钮） -->
+                                <Button Style="{StaticResource NeuroButton}"
+                                        Command="{Binding AddAppManuallyCommand}"
+                                        Foreground="{StaticResource NeuroTextBrush}"
+                                        Padding="18,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="PencilPlus" Width="18" Height="18" Margin="0,0,8,0"/>
+                                        <TextBlock Text="手动添加" FontSize="14"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Border>
 
-                <!-- Apps List -->
+                <!-- 应用列表区域 -->
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
+                              HorizontalScrollBarVisibility="Disabled"
+                              Margin="8,0,8,16">
                     <ItemsControl ItemsSource="{Binding FilteredApps}"
                                   ItemTemplate="{StaticResource AppCardTemplate}"
-                                  Margin="16,0,16,16">
+                                  Margin="16,4">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal"/>
@@ -493,39 +541,58 @@
                     </ItemsControl>
                 </ScrollViewer>
 
-                <!-- Empty State -->
+                <!-- 空状态提示 -->
                 <StackPanel Grid.Row="1"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Visibility="{Binding HasNoApps, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <materialDesign:PackIcon Kind="Apps"
-                                             Width="80" Height="80"
-                                             HorizontalAlignment="Center"
-                                             Opacity="0.3"/>
+                    <!-- 空状态图标（Neumorphic 凹陷容器） -->
+                    <Border Width="100" Height="100"
+                            CornerRadius="28"
+                            Background="{StaticResource NeuroInsetBrush}"
+                            Opacity="0.7">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="135"
+                                              Color="#1E1E28" Opacity="0.5"/>
+                        </Border.Effect>
+                        <materialDesign:PackIcon Kind="Apps"
+                                                 Width="50" Height="50"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{StaticResource NeuroTextDimBrush}"
+                                                 Opacity="0.5"/>
+                    </Border>
                     <TextBlock Text="还没有添加任何应用"
                                FontSize="18"
-                               Opacity="0.5"
+                               Foreground="{StaticResource NeuroTextDimBrush}"
                                HorizontalAlignment="Center"
-                               Margin="0,16,0,8"/>
+                               Margin="0,20,0,8"/>
                     <TextBlock Text="点击上方「添加应用」按钮开始添加"
                                FontSize="14"
-                               Opacity="0.3"
+                               Foreground="{StaticResource NeuroTextDimBrush}"
+                               Opacity="0.5"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
 
-            <!-- Loading Overlay -->
+            <!-- 加载遮罩（Neumorphic 凹陷叠加层） -->
             <Border Grid.ColumnSpan="2"
-                    Background="#80000000"
+                    Background="#CC1E1E28"
                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Width="100" Height="100"
+                        CornerRadius="28"
+                        Background="{StaticResource NeuroBackgroundBrush}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="16" ShadowDepth="6" Direction="135"
+                                          Color="#1E1E28" Opacity="0.7"/>
+                    </Border.Effect>
                     <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                  IsIndeterminate="True"
-                                 Width="60" Height="60"/>
-                    <TextBlock Text="加载中..."
-                               Margin="0,16,0,0"
-                               FontSize="16"/>
-                </StackPanel>
+                                 Width="50" Height="50"
+                                 Foreground="{StaticResource NeuroAccentBrush}"/>
+                </Border>
             </Border>
         </Grid>
     </materialDesign:DialogHost>

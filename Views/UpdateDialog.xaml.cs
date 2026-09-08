@@ -82,7 +82,8 @@ public partial class UpdateDialog : Window
             App.Updater.ProgressChanged += (_, args) =>
                 Dispatcher.Invoke(() =>
                 {
-                    ProgressBar.Value = args.Progress;
+                    // 更新自定义进度条宽度
+                    ProgressBarFill.Width = Math.Max(0, ProgressBarTrack.ActualWidth * args.Progress / 100.0);
                     TxtProgress.Text = args.Message;
                 });
 

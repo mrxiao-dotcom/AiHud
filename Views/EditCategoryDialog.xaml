@@ -3,106 +3,155 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:converters="clr-namespace:AiDaBenYing.Converters"
-             Width="400">
+             Width="420"
+             Background="#2A2A38">
 
     <UserControl.Resources>
         <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
     </UserControl.Resources>
 
-    <StackPanel Margin="24">
-        <TextBlock Text="编辑分类"
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Margin="0,0,0,24"/>
+    <Border CornerRadius="20"
+            Background="#2A2A38"
+            Margin="4">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="8" Direction="315"
+                              Color="#3A3A4C" Opacity="0.6"/>
+        </Border.Effect>
 
-        <!-- Category Name -->
-        <TextBox x:Name="CategoryNameTextBox"
-                 materialDesign:HintAssist.Hint="分类名称"
-                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                 Margin="0,0,0,16"/>
+        <StackPanel Margin="28,28,28,28">
+            <!-- 标题 -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                <Border Width="44" Height="44" CornerRadius="12"
+                        Background="#8B5CF6">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="315"
+                                          Color="#3A3A4C" Opacity="0.6"/>
+                    </Border.Effect>
+                    <materialDesign:PackIcon Kind="Pencil"
+                                             Width="26" Height="26"
+                                             Foreground="White"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="编辑分类"
+                           FontSize="22"
+                           FontWeight="Bold"
+                           Foreground="#C4C4D4"
+                           VerticalAlignment="Center"
+                           Margin="14,0,0,0"/>
+            </StackPanel>
 
-        <!-- Color Picker -->
-        <TextBlock Text="选择颜色"
-                   FontSize="14"
-                   Margin="0,0,0,8"/>
-        <WrapPanel Margin="0,0,0,16">
-            <RadioButton x:Name="ColorPurple" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="紫色" Background="#7C4DFF"/>
-            <RadioButton x:Name="ColorGreen" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="绿色" Background="#4CAF50"/>
-            <RadioButton x:Name="ColorBlue" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="蓝色" Background="#2196F3"/>
-            <RadioButton x:Name="ColorOrange" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="橙色" Background="#FF9800"/>
-            <RadioButton x:Name="ColorRed" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="红色" Background="#F44336"/>
-            <RadioButton x:Name="ColorPink" GroupName="CategoryColor"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         Content="粉色" Background="#E91E63"/>
-        </WrapPanel>
+            <!-- 分类名称（Neumorphic 凹陷） -->
+            <Grid Margin="0,0,0,20">
+                <Border CornerRadius="12" Background="#222230">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
+                                          Color="#1E1E28" Opacity="0.65"/>
+                    </Border.Effect>
+                </Border>
+                <Border CornerRadius="12" BorderBrush="#3A3A4C" BorderThickness="1" Opacity="0.3"/>
+                <TextBox x:Name="CategoryNameTextBox"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="#C4C4D4"
+                         CaretBrush="#8B5CF6"
+                         FontSize="14"
+                         Padding="16,14"
+                         VerticalContentAlignment="Center"
+                         materialDesign:HintAssist.Hint="分类名称"
+                         materialDesign:HintAssist.Foreground="#8888A0"
+                         materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
+            </Grid>
 
-        <!-- Icon Picker -->
-        <TextBlock Text="选择图标"
-                   FontSize="14"
-                   Margin="0,0,0,8"/>
-        <WrapPanel Margin="0,0,0,24">
-            <RadioButton x:Name="IconFolder" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="文件夹">
-                <materialDesign:PackIcon Kind="FolderOutline"/>
-            </RadioButton>
-            <RadioButton x:Name="IconChart" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="图表">
-                <materialDesign:PackIcon Kind="ChartLine"/>
-            </RadioButton>
-            <RadioButton x:Name="IconRobot" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="机器人">
-                <materialDesign:PackIcon Kind="Robot"/>
-            </RadioButton>
-            <RadioButton x:Name="IconWrench" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="工具">
-                <materialDesign:PackIcon Kind="Wrench"/>
-            </RadioButton>
-            <RadioButton x:Name="IconCode" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="代码">
-                <materialDesign:PackIcon Kind="Code"/>
-            </RadioButton>
-            <RadioButton x:Name="IconBrain" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="大脑">
-                <materialDesign:PackIcon Kind="Brain"/>
-            </RadioButton>
-            <RadioButton x:Name="IconGamepad" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="游戏">
-                <materialDesign:PackIcon Kind="GamepadVariant"/>
-            </RadioButton>
-            <RadioButton x:Name="IconBook" GroupName="CategoryIcon"
-                         Style="{StaticResource MaterialDesignChoiceChipPrimaryRadioButton}"
-                         ToolTip="书籍">
-                <materialDesign:PackIcon Kind="BookOpenPageVariant"/>
-            </RadioButton>
-        </WrapPanel>
+            <!-- 颜色选择器 -->
+            <TextBlock Text="选择颜色"
+                       FontSize="14"
+                       Foreground="#8888A0"
+                       Margin="0,0,0,10"/>
+            <WrapPanel Margin="0,0,0,20">
+                <RadioButton x:Name="ColorPurple" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="紫色" Tag="#7C4DFF"/>
+                <RadioButton x:Name="ColorGreen" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="绿色" Tag="#4CAF50"/>
+                <RadioButton x:Name="ColorBlue" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="蓝色" Tag="#2196F3"/>
+                <RadioButton x:Name="ColorOrange" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="橙色" Tag="#FF9800"/>
+                <RadioButton x:Name="ColorRed" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="红色" Tag="#F44336"/>
+                <RadioButton x:Name="ColorPink" GroupName="CategoryColor"
+                             Style="{StaticResource NeuroChipRadio}"
+                             Content="粉色" Tag="#E91E63"/>
+            </WrapPanel>
 
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource MaterialDesignFlatButton}"
-                    Content="取消"
-                    Margin="0,0,8,0"
-                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                    CommandParameter="{x:Null}"/>
-            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                    Content="保存"
-                    Click="SaveButton_Click"/>
+            <!-- 图标选择器 -->
+            <TextBlock Text="选择图标"
+                       FontSize="14"
+                       Foreground="#8888A0"
+                       Margin="0,0,0,10"/>
+            <WrapPanel Margin="0,0,0,24">
+                <RadioButton x:Name="IconFolder" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="文件夹">
+                    <materialDesign:PackIcon Kind="FolderOutline"/>
+                </RadioButton>
+                <RadioButton x:Name="IconChart" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="图表">
+                    <materialDesign:PackIcon Kind="ChartLine"/>
+                </RadioButton>
+                <RadioButton x:Name="IconRobot" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="机器人">
+                    <materialDesign:PackIcon Kind="Robot"/>
+                </RadioButton>
+                <RadioButton x:Name="IconWrench" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="工具">
+                    <materialDesign:PackIcon Kind="Wrench"/>
+                </RadioButton>
+                <RadioButton x:Name="IconCode" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="代码">
+                    <materialDesign:PackIcon Kind="Code"/>
+                </RadioButton>
+                <RadioButton x:Name="IconBrain" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="大脑">
+                    <materialDesign:PackIcon Kind="Brain"/>
+                </RadioButton>
+                <RadioButton x:Name="IconGamepad" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="游戏">
+                    <materialDesign:PackIcon Kind="GamepadVariant"/>
+                </RadioButton>
+                <RadioButton x:Name="IconBook" GroupName="CategoryIcon"
+                             Style="{StaticResource NeuroChipRadio}"
+                             ToolTip="书籍">
+                    <materialDesign:PackIcon Kind="BookOpenPageVariant"/>
+                </RadioButton>
+            </WrapPanel>
+
+            <!-- 按钮行 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource NeuroButton}"
+                        Content="取消"
+                        Foreground="#8888A0"
+                        Padding="18,10"
+                        Margin="0,0,10,0"
+                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                        CommandParameter="{x:Null}"/>
+                <Button Style="{StaticResource NeuroPrimaryButton}"
+                        Content="保存"
+                        Foreground="#8B5CF6"
+                        Padding="18,10"
+                        Click="SaveButton_Click"/>
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
+    </Border>
 </UserControl>
