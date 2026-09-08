@@ -194,12 +194,7 @@
                                 CornerRadius="14"
                                 Background="{DynamicResource NeuroBackgroundBrush}"
                                 Padding="{TemplateBinding Padding}">
-                            <Grid>
-                                <Border CornerRadius="14"
-                                        BorderBrush="{DynamicResource NeuroAccentBrush}"
-                                        BorderThickness="1.5" Opacity="0.5"/>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -259,12 +254,7 @@
                                 CornerRadius="14"
                                 Background="{DynamicResource NeuroBackgroundBrush}"
                                 Padding="{TemplateBinding Padding}">
-                            <Grid>
-                                <Border CornerRadius="14"
-                                        BorderBrush="{DynamicResource NeuroDangerBrush}"
-                                        BorderThickness="1.5" Opacity="0.5"/>
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Grid>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
