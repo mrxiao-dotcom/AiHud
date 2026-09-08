@@ -4,28 +4,28 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:converters="clr-namespace:AiDaBenYing.Converters"
              Width="420"
-             Background="#2A2A38">
+             Background="{DynamicResource NeuroBackgroundBrush}">
 
     <UserControl.Resources>
         <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
     </UserControl.Resources>
 
     <Border CornerRadius="20"
-            Background="#2A2A38"
+            Background="{DynamicResource NeuroBackgroundBrush}"
             Margin="4">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="8" Direction="315"
-                              Color="#3A3A4C" Opacity="0.6"/>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="10" Direction="315"
+                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
         </Border.Effect>
 
-        <StackPanel Margin="28,28,28,28">
-            <!-- 标题（带 Neumorphic 图标） -->
+        <StackPanel Margin="28">
+            <!-- 标题 -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
                 <Border Width="44" Height="44" CornerRadius="12"
-                        Background="#8B5CF6">
+                        Background="{DynamicResource NeuroAccentBrush}">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="315"
-                                          Color="#3A3A4C" Opacity="0.6"/>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
                     </Border.Effect>
                     <materialDesign:PackIcon Kind="FolderPlus"
                                              Width="26" Height="26"
@@ -36,7 +36,7 @@
                 <TextBlock Text="添加新分类"
                            FontSize="22"
                            FontWeight="Bold"
-                           Foreground="#C4C4D4"
+                           Foreground="{DynamicResource NeuroTextBrush}"
                            VerticalAlignment="Center"
                            Margin="14,0,0,0"/>
             </StackPanel>
@@ -44,98 +44,98 @@
             <!-- 分类名称输入框（Neumorphic 凹陷） -->
             <Grid Margin="0,0,0,20">
                 <Border CornerRadius="12"
-                        Background="#222230">
+                        Background="{DynamicResource NeuroInsetBrush}">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
-                                          Color="#1E1E28" Opacity="0.65"/>
+                                          Color="{DynamicResource NeuroDarkShadow}" Opacity="0.65"/>
                     </Border.Effect>
                 </Border>
                 <Border CornerRadius="12"
-                        BorderBrush="#3A3A4C"
+                        BorderBrush="{DynamicResource NeuroBorderBrush}"
                         BorderThickness="1"
-                        Opacity="0.3"/>
+                        Opacity="0.4"/>
                 <TextBox x:Name="CategoryNameTextBox"
                          Background="Transparent"
                          BorderThickness="0"
-                         Foreground="#C4C4D4"
-                         CaretBrush="#8B5CF6"
+                         Foreground="{DynamicResource NeuroTextBrush}"
+                         CaretBrush="{DynamicResource NeuroAccentBrush}"
                          FontSize="14"
                          Padding="16,14"
                          VerticalContentAlignment="Center"
                          materialDesign:HintAssist.Hint="分类名称"
-                         materialDesign:HintAssist.Foreground="#8888A0"
+                         materialDesign:HintAssist.Foreground="{DynamicResource NeuroTextDimBrush}"
                          materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
             </Grid>
 
             <!-- 颜色选择器 -->
             <TextBlock Text="选择颜色"
                        FontSize="14"
-                       Foreground="#8888A0"
+                       Foreground="{DynamicResource NeuroTextDimBrush}"
                        Margin="0,0,0,10"/>
             <WrapPanel Margin="0,0,0,20">
                 <RadioButton x:Name="ColorPurple" GroupName="CategoryColor" IsChecked="True"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="紫色" Tag="#7C4DFF"/>
                 <RadioButton x:Name="ColorGreen" GroupName="CategoryColor"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="绿色" Tag="#4CAF50"/>
                 <RadioButton x:Name="ColorBlue" GroupName="CategoryColor"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="蓝色" Tag="#2196F3"/>
                 <RadioButton x:Name="ColorOrange" GroupName="CategoryColor"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="橙色" Tag="#FF9800"/>
                 <RadioButton x:Name="ColorRed" GroupName="CategoryColor"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="红色" Tag="#F44336"/>
                 <RadioButton x:Name="ColorPink" GroupName="CategoryColor"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              Content="粉色" Tag="#E91E63"/>
             </WrapPanel>
 
             <!-- 图标选择器 -->
             <TextBlock Text="选择图标"
                        FontSize="14"
-                       Foreground="#8888A0"
+                       Foreground="{DynamicResource NeuroTextDimBrush}"
                        Margin="0,0,0,10"/>
             <WrapPanel Margin="0,0,0,24">
                 <RadioButton x:Name="IconFolder" GroupName="CategoryIcon" IsChecked="True"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="文件夹">
                     <materialDesign:PackIcon Kind="FolderOutline"/>
                 </RadioButton>
                 <RadioButton x:Name="IconChart" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="图表">
                     <materialDesign:PackIcon Kind="ChartLine"/>
                 </RadioButton>
                 <RadioButton x:Name="IconRobot" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="机器人">
                     <materialDesign:PackIcon Kind="Robot"/>
                 </RadioButton>
                 <RadioButton x:Name="IconWrench" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="工具">
                     <materialDesign:PackIcon Kind="Wrench"/>
                 </RadioButton>
                 <RadioButton x:Name="IconCode" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="代码">
                     <materialDesign:PackIcon Kind="Code"/>
                 </RadioButton>
                 <RadioButton x:Name="IconBrain" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="大脑">
                     <materialDesign:PackIcon Kind="Brain"/>
                 </RadioButton>
                 <RadioButton x:Name="IconGamepad" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="游戏">
                     <materialDesign:PackIcon Kind="GamepadVariant"/>
                 </RadioButton>
                 <RadioButton x:Name="IconBook" GroupName="CategoryIcon"
-                             Style="{StaticResource NeuroChipRadio}"
+                             Style="{DynamicResource NeuroChipRadio}"
                              ToolTip="书籍">
                     <materialDesign:PackIcon Kind="BookOpenPageVariant"/>
                 </RadioButton>
@@ -143,16 +143,16 @@
 
             <!-- 按钮行 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource NeuroButton}"
+                <Button Style="{DynamicResource NeuroButton}"
                         Content="取消"
-                        Foreground="#8888A0"
+                        Foreground="{DynamicResource NeuroTextDimBrush}"
                         Padding="18,10"
                         Margin="0,0,10,0"
                         Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
                         CommandParameter="{x:Null}"/>
-                <Button Style="{StaticResource NeuroPrimaryButton}"
+                <Button Style="{DynamicResource NeuroPrimaryButton}"
                         Content="添加"
-                        Foreground="#8B5CF6"
+                        Foreground="{DynamicResource NeuroAccentBrush}"
                         Padding="18,10"
                         Click="AddButton_Click"/>
             </StackPanel>

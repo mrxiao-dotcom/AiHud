@@ -11,8 +11,8 @@
         Height="800" Width="1200"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource NeuroBackgroundBrush}"
-        TextElement.Foreground="{StaticResource NeuroTextBrush}"
+        Background="{DynamicResource NeuroBackgroundBrush}"
+        TextElement.Foreground="{DynamicResource NeuroTextBrush}"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
         FontFamily="Segoe UI">
@@ -31,17 +31,17 @@
 
         <!-- ══════════════════════════════════════════════════════════════
              NEUMORPHISM 分类条目样式
-             未选中：扁平背景；选中：凸起 + 强调色左边线
              ══════════════════════════════════════════════════════════════ -->
         <Style x:Key="NeuroCategoryItem" TargetType="Border">
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="4,2"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="{StaticResource NeuroBackgroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource NeuroBackgroundBrush}"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315"
+                                      Color="{DynamicResource NeuroLightShadow}" Opacity="0.5"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -52,10 +52,11 @@
                             <Binding Path="DataContext.SelectedCategory" RelativeSource="{RelativeSource AncestorType=Window}"/>
                         </MultiBinding>
                     </DataTrigger.Binding>
-                    <Setter Property="Background" Value="{StaticResource NeuroHighlightBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource NeuroHighlightBrush}"/>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315" Color="#8B5CF6" Opacity="0.35"/>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                              Color="{DynamicResource NeuroAccent}" Opacity="0.4"/>
                         </Setter.Value>
                     </Setter>
                 </DataTrigger>
@@ -70,18 +71,20 @@
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="Margin" Value="4,2"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="{StaticResource NeuroBackgroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource NeuroBackgroundBrush}"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315"
+                                      Color="{DynamicResource NeuroLightShadow}" Opacity="0.5"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SelectedCategory}" Value="{x:Null}">
-                    <Setter Property="Background" Value="{StaticResource NeuroHighlightBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource NeuroHighlightBrush}"/>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315" Color="#8B5CF6" Opacity="0.35"/>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                              Color="{DynamicResource NeuroAccent}" Opacity="0.4"/>
                         </Setter.Value>
                     </Setter>
                 </DataTrigger>
@@ -99,36 +102,36 @@
                     HorizontalContentAlignment="Stretch"
                     Command="{Binding DataContext.LaunchAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     CommandParameter="{Binding}"
-                    Style="{StaticResource NeuroAppCard}"
-                    Foreground="{StaticResource NeuroTextBrush}"
+                    Style="{DynamicResource NeuroAppCard}"
+                    Foreground="{DynamicResource NeuroTextBrush}"
                     PreviewMouseRightButtonUp="AppButton_PreviewMouseRightButtonUp">
                 <Button.ContextMenu>
-                    <ContextMenu Background="{StaticResource NeuroBackgroundBrush}"
-                                 Foreground="{StaticResource NeuroTextBrush}">
+                    <ContextMenu Background="{DynamicResource NeuroBackgroundBrush}"
+                                 Foreground="{DynamicResource NeuroTextBrush}">
                         <MenuItem Header="编辑" Click="EditApp_Click"
-                                  Foreground="{StaticResource NeuroTextBrush}">
+                                  Foreground="{DynamicResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource NeuroAccentBrush}"/>
+                                <materialDesign:PackIcon Kind="Pencil" Foreground="{DynamicResource NeuroAccentBrush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <MenuItem Header="在文件资源管理器中显示" Click="OpenInExplorer_Click"
-                                  Foreground="{StaticResource NeuroTextBrush}">
+                                  Foreground="{DynamicResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="FolderOpen" Foreground="{StaticResource NeuroAccent2Brush}"/>
+                                <materialDesign:PackIcon Kind="FolderOpen" Foreground="{DynamicResource NeuroAccent2Brush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
                         <MenuItem Header="移动到..." Click="MoveApp_Click"
-                                  Foreground="{StaticResource NeuroTextBrush}">
+                                  Foreground="{DynamicResource NeuroTextBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="FolderMove" Foreground="{StaticResource NeuroAccent2Brush}"/>
+                                <materialDesign:PackIcon Kind="FolderMove" Foreground="{DynamicResource NeuroAccent2Brush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
                         <MenuItem Header="删除" Click="DeleteApp_Click"
-                                  Foreground="{StaticResource NeuroDangerBrush}">
+                                  Foreground="{DynamicResource NeuroDangerBrush}">
                             <MenuItem.Icon>
-                                <materialDesign:PackIcon Kind="Delete" Foreground="{StaticResource NeuroDangerBrush}"/>
+                                <materialDesign:PackIcon Kind="Delete" Foreground="{DynamicResource NeuroDangerBrush}"/>
                             </MenuItem.Icon>
                         </MenuItem>
                     </ContextMenu>
@@ -139,28 +142,30 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- App Icon（Neumorphic 圆形容器） -->
+                    <!-- App Icon -->
                     <Border Grid.Column="0"
                             Width="40" Height="40"
                             CornerRadius="12"
-                            Background="{StaticResource NeuroHighlightBrush}"
+                            Background="{DynamicResource NeuroHighlightBrush}"
                             Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityForIconConverter}, ConverterParameter=icon}">
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315" Color="#3A3A4C" Opacity="0.5"/>
+                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315"
+                                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.5"/>
                         </Border.Effect>
                         <Image Source="{Binding Icon}"
                                Width="30" Height="30"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Border>
 
-                    <!-- Initials Fallback（Neumorphic 容器） -->
+                    <!-- Initials Fallback -->
                     <Border Grid.Column="0"
                             Width="40" Height="40"
                             CornerRadius="12"
-                            Background="{StaticResource NeuroAccentBrush}"
+                            Background="{DynamicResource NeuroAccentBrush}"
                             Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityForIconConverter}, ConverterParameter=initials}">
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315" Color="#3A3A4C" Opacity="0.4"/>
+                            <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315"
+                                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.4"/>
                         </Border.Effect>
                         <TextBlock Text="{Binding Name, Converter={StaticResource StringToInitialsConverter}}"
                                    FontSize="13"
@@ -184,7 +189,7 @@
     </Window.Resources>
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <Grid Background="{StaticResource NeuroBackgroundBrush}">
+        <Grid Background="{DynamicResource NeuroBackgroundBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280"/>
                 <ColumnDefinition Width="*"/>
@@ -194,13 +199,7 @@
                  左侧边栏
                  ══════════════════════════════════════════════════════════ -->
             <Border Grid.Column="0"
-                    Background="{StaticResource NeuroBackgroundBrush}">
-                <!-- 左侧细阴影（增加层次感） -->
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Direction="0"
-                                      Color="#1E1E28" Opacity="0.3"/>
-                </Border.Effect>
-
+                    Background="{DynamicResource NeuroBackgroundBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -209,16 +208,15 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Header 区域 -->
+                    <!-- Header -->
                     <StackPanel Grid.Row="0" Margin="20,24,20,12">
                         <StackPanel Orientation="Horizontal">
-                            <!-- Neumorphic Logo 图标 -->
                             <Border Width="48" Height="48"
                                     CornerRadius="14"
-                                    Background="{StaticResource NeuroAccentBrush}">
+                                    Background="{DynamicResource NeuroAccentBrush}">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="315"
-                                                      Color="#3A3A4C" Opacity="0.6"/>
+                                    <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                                      Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
                                 </Border.Effect>
                                 <materialDesign:PackIcon Kind="Robot"
                                                          Width="28" Height="28"
@@ -230,32 +228,29 @@
                                 <TextBlock Text="AI大本营"
                                            FontSize="22"
                                            FontWeight="Bold"
-                                           Foreground="{StaticResource NeuroTextBrush}"/>
+                                           Foreground="{DynamicResource NeuroTextBrush}"/>
                                 <TextBlock Text="AI工具集散地"
                                            FontSize="12"
-                                           Foreground="{StaticResource NeuroTextDimBrush}"
+                                           Foreground="{DynamicResource NeuroTextDimBrush}"
                                            Margin="0,2,0,0"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- 搜索框（Neumorphic 凹陷风格） -->
+                    <!-- 搜索框（Neumorphic 凹陷） -->
                     <Grid Grid.Row="1" Margin="16,4,16,16">
-                        <Border x:Name="SearchBorder"
-                                CornerRadius="14"
-                                Background="{StaticResource NeuroBackgroundBrush}">
+                        <Border CornerRadius="14"
+                                Background="{DynamicResource NeuroInsetBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
-                                                  Color="#1E1E28" Opacity="0.7"/>
+                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.65"/>
                             </Border.Effect>
                         </Border>
-                        <!-- 内高光 -->
                         <Border CornerRadius="14"
-                                BorderBrush="#3A3A4C"
+                                BorderBrush="{DynamicResource NeuroBorderBrush}"
                                 BorderThickness="1"
-                                Opacity="0.3"/>
-                        <!-- 搜索图标 + 输入框 -->
-                        <Grid Margin="16,0,16,0">
+                                Opacity="0.4"/>
+                        <Grid Margin="16,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="32"/>
                                 <ColumnDefinition Width="*"/>
@@ -263,20 +258,20 @@
                             <materialDesign:PackIcon Grid.Column="0"
                                                      Kind="Magnify"
                                                      Width="20" Height="20"
-                                                     Foreground="{StaticResource NeuroTextDimBrush}"
+                                                     Foreground="{DynamicResource NeuroTextDimBrush}"
                                                      VerticalAlignment="Center"
                                                      HorizontalAlignment="Center"/>
                             <TextBox Grid.Column="1"
                                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Foreground="{StaticResource NeuroTextBrush}"
-                                     CaretBrush="{StaticResource NeuroAccentBrush}"
+                                     Foreground="{DynamicResource NeuroTextBrush}"
+                                     CaretBrush="{DynamicResource NeuroAccentBrush}"
                                      FontSize="14"
                                      VerticalAlignment="Center"
                                      Padding="0,14"
                                      materialDesign:HintAssist.Hint="搜索应用..."
-                                     materialDesign:HintAssist.Foreground="{StaticResource NeuroTextDimBrush}"
+                                     materialDesign:HintAssist.Foreground="{DynamicResource NeuroTextDimBrush}"
                                      materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
                         </Grid>
                     </Grid>
@@ -287,68 +282,65 @@
                         <StackPanel>
                             <!-- 全部应用按钮 -->
                             <Grid Margin="6,2" Cursor="Hand" MouseLeftButtonDown="AllApps_Click">
-                                <Border Style="{StaticResource NeuroAllAppsButton}">
+                                <Border Style="{DynamicResource NeuroAllAppsButton}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-
                                         <materialDesign:PackIcon Grid.Column="0"
                                                                  Kind="Apps"
                                                                  Width="24" Height="24"
                                                                  VerticalAlignment="Center"
-                                                                 Foreground="{StaticResource NeuroAccentBrush}"/>
+                                                                 Foreground="{DynamicResource NeuroAccentBrush}"/>
                                         <TextBlock Grid.Column="1"
                                                    Text="全部应用"
                                                    VerticalAlignment="Center"
                                                    Margin="12,0,0,0"
                                                    FontSize="15"
                                                    FontWeight="Medium"
-                                                   Foreground="{StaticResource NeuroTextBrush}"/>
+                                                   Foreground="{DynamicResource NeuroTextBrush}"/>
                                         <TextBlock Grid.Column="2"
                                                    Text="{Binding AllApps.Count, StringFormat='({0})'}"
                                                    VerticalAlignment="Center"
-                                                   Foreground="{StaticResource NeuroTextDimBrush}"
+                                                   Foreground="{DynamicResource NeuroTextDimBrush}"
                                                    FontSize="12"
                                                    Margin="8,0,0,0"/>
                                     </Grid>
                                 </Border>
                             </Grid>
 
-                            <!-- 分类项目列表 -->
+                            <!-- 分类项目 -->
                             <ItemsControl x:Name="CategoriesPanel" ItemsSource="{Binding Categories}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Margin="6,2" Cursor="Hand" MouseLeftButtonDown="CategoryItem_Click">
                                             <Grid.ContextMenu>
-                                                <ContextMenu Background="{StaticResource NeuroBackgroundBrush}"
-                                                             Foreground="{StaticResource NeuroTextBrush}">
+                                                <ContextMenu Background="{DynamicResource NeuroBackgroundBrush}"
+                                                             Foreground="{DynamicResource NeuroTextBrush}">
                                                     <MenuItem Header="编辑分类" Click="EditCategory_Click"
-                                                              Foreground="{StaticResource NeuroTextBrush}">
+                                                              Foreground="{DynamicResource NeuroTextBrush}">
                                                         <MenuItem.Icon>
-                                                            <materialDesign:PackIcon Kind="Pencil" Foreground="{StaticResource NeuroAccentBrush}"/>
+                                                            <materialDesign:PackIcon Kind="Pencil" Foreground="{DynamicResource NeuroAccentBrush}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <Separator/>
                                                     <MenuItem Header="删除分类" Click="DeleteCategory_Click"
-                                                              Foreground="{StaticResource NeuroDangerBrush}">
+                                                              Foreground="{DynamicResource NeuroDangerBrush}">
                                                         <MenuItem.Icon>
-                                                            <materialDesign:PackIcon Kind="Delete" Foreground="{StaticResource NeuroDangerBrush}"/>
+                                                            <materialDesign:PackIcon Kind="Delete" Foreground="{DynamicResource NeuroDangerBrush}"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                 </ContextMenu>
                                             </Grid.ContextMenu>
-
-                                            <Border Style="{StaticResource NeuroCategoryItem}" Tag="{Binding}">
+                                            <Border Style="{DynamicResource NeuroCategoryItem}" Tag="{Binding}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
                                                         <ColumnDefinition Width="*"/>
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
-
                                                     <materialDesign:PackIcon Grid.Column="0"
                                                                              Kind="{Binding Icon}"
                                                                              Width="24" Height="24"
@@ -360,11 +352,11 @@
                                                                Margin="12,0,0,0"
                                                                FontSize="15"
                                                                FontWeight="Medium"
-                                                               Foreground="{StaticResource NeuroTextBrush}"/>
+                                                               Foreground="{DynamicResource NeuroTextBrush}"/>
                                                     <TextBlock Grid.Column="2"
                                                                Text="{Binding AppItems.Count, StringFormat='({0})'}"
                                                                VerticalAlignment="Center"
-                                                               Foreground="{StaticResource NeuroTextDimBrush}"
+                                                               Foreground="{DynamicResource NeuroTextDimBrush}"
                                                                FontSize="12"
                                                                Margin="8,0,0,0"/>
                                                 </Grid>
@@ -374,11 +366,11 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!-- 添加分类按钮（Neumorphic 凸起） -->
+                            <!-- 添加分类按钮 -->
                             <Button Margin="16,12"
-                                    Style="{StaticResource NeuroButton}"
+                                    Style="{DynamicResource NeuroButton}"
                                     Click="AddCategory_Click"
-                                    Foreground="{StaticResource NeuroAccentBrush}"
+                                    Foreground="{DynamicResource NeuroAccentBrush}"
                                     Padding="16,10">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,10,0"/>
@@ -388,15 +380,18 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- 底部操作按钮区域 -->
+                    <!-- 底部操作按钮 -->
                     <StackPanel Grid.Row="3" Margin="16,8,16,20">
-                        <!-- 分隔线 -->
-                        <Border Height="1" Background="#3A3A4C" Opacity="0.4" Margin="0,0,0,16" CornerRadius="1"/>
+                        <Border Height="1"
+                                Background="{DynamicResource NeuroBorderBrush}"
+                                Opacity="0.4"
+                                Margin="0,0,0,16"
+                                CornerRadius="1"/>
 
-                        <Button Style="{StaticResource NeuroFlatButton}"
+                        <Button Style="{DynamicResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
                                 Command="{Binding ToggleThemeCommand}"
-                                Foreground="{StaticResource NeuroTextBrush}"
+                                Foreground="{DynamicResource NeuroTextBrush}"
                                 Padding="10,8">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="ThemeLightDark" Width="18" Height="18"/>
@@ -404,10 +399,10 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource NeuroFlatButton}"
+                        <Button Style="{DynamicResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
                                 Click="ShowAppMarket_Click"
-                                Foreground="{StaticResource NeuroTextBrush}"
+                                Foreground="{DynamicResource NeuroTextBrush}"
                                 Padding="10,8">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Store" Width="18" Height="18"/>
@@ -415,10 +410,10 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource NeuroFlatButton}"
+                        <Button Style="{DynamicResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
                                 Click="ShowLicense_Click"
-                                Foreground="{StaticResource NeuroTextBrush}"
+                                Foreground="{DynamicResource NeuroTextBrush}"
                                 Padding="10,8">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="KeyVariant" Width="18" Height="18"/>
@@ -426,10 +421,10 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Style="{StaticResource NeuroFlatButton}"
+                        <Button Style="{DynamicResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
                                 Click="CheckUpdate_Click"
-                                Foreground="{StaticResource NeuroTextBrush}"
+                                Foreground="{DynamicResource NeuroTextBrush}"
                                 Padding="10,8">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Update" Width="18" Height="18"/>
@@ -440,11 +435,11 @@
                 </Grid>
             </Border>
 
-            <!-- 分割线（Neumorphic 凹陷线） -->
+            <!-- 分割线 -->
             <Border Grid.Column="0"
                     HorizontalAlignment="Right"
                     Width="1"
-                    Background="#3A3A4C"
+                    Background="{DynamicResource NeuroBorderBrush}"
                     Opacity="0.5"
                     Margin="0,20,0,20"
                     CornerRadius="1"/>
@@ -458,15 +453,15 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- 顶部标题栏（Neumorphic 凸起面板） -->
+                <!-- 顶部标题栏 -->
                 <Border Grid.Row="0"
                         Margin="24,20,24,12"
                         Padding="20,16">
                     <Border CornerRadius="16"
-                            Background="{StaticResource NeuroBackgroundBrush}">
+                            Background="{DynamicResource NeuroBackgroundBrush}">
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
-                                              Color="#3A3A4C" Opacity="0.5"/>
+                            <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="315"
+                                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.55"/>
                         </Border.Effect>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -474,14 +469,13 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 分类标题 -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Border Width="44" Height="44"
                                         CornerRadius="12"
-                                        Background="{StaticResource NeuroHighlightBrush}">
+                                        Background="{DynamicResource NeuroHighlightBrush}">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="315"
-                                                          Color="#3A3A4C" Opacity="0.5"/>
+                                        <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="315"
+                                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.5"/>
                                     </Border.Effect>
                                     <materialDesign:PackIcon Kind="{Binding CurrentCategoryIcon}"
                                                              Width="26" Height="26"
@@ -494,15 +488,13 @@
                                            FontWeight="Bold"
                                            VerticalAlignment="Center"
                                            Margin="16,0,0,0"
-                                           Foreground="{StaticResource NeuroTextBrush}"/>
+                                           Foreground="{DynamicResource NeuroTextBrush}"/>
                             </StackPanel>
 
-                            <!-- 操作按钮 -->
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <!-- 添加应用（主按钮） -->
-                                <Button Style="{StaticResource NeuroPrimaryButton}"
+                                <Button Style="{DynamicResource NeuroPrimaryButton}"
                                         Command="{Binding AddAppCommand}"
-                                        Foreground="{StaticResource NeuroAccentBrush}"
+                                        Foreground="{DynamicResource NeuroAccentBrush}"
                                         Padding="18,10"
                                         Margin="0,0,10,0">
                                     <StackPanel Orientation="Horizontal">
@@ -510,10 +502,9 @@
                                         <TextBlock Text="添加应用" FontSize="14"/>
                                     </StackPanel>
                                 </Button>
-                                <!-- 手动添加（标准按钮） -->
-                                <Button Style="{StaticResource NeuroButton}"
+                                <Button Style="{DynamicResource NeuroButton}"
                                         Command="{Binding AddAppManuallyCommand}"
-                                        Foreground="{StaticResource NeuroTextBrush}"
+                                        Foreground="{DynamicResource NeuroTextBrush}"
                                         Padding="18,10">
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="PencilPlus" Width="18" Height="18" Margin="0,0,8,0"/>
@@ -525,7 +516,7 @@
                     </Border>
                 </Border>
 
-                <!-- 应用列表区域 -->
+                <!-- 应用列表 -->
                 <ScrollViewer Grid.Row="1"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled"
@@ -541,57 +532,57 @@
                     </ItemsControl>
                 </ScrollViewer>
 
-                <!-- 空状态提示 -->
+                <!-- 空状态 -->
                 <StackPanel Grid.Row="1"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Visibility="{Binding HasNoApps, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <!-- 空状态图标（Neumorphic 凹陷容器） -->
                     <Border Width="100" Height="100"
                             CornerRadius="28"
-                            Background="{StaticResource NeuroInsetBrush}"
-                            Opacity="0.7">
+                            Background="{DynamicResource NeuroInsetBrush}"
+                            Opacity="0.8">
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="135"
-                                              Color="#1E1E28" Opacity="0.5"/>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="135"
+                                              Color="{DynamicResource NeuroDarkShadow}" Opacity="0.5"/>
                         </Border.Effect>
                         <materialDesign:PackIcon Kind="Apps"
                                                  Width="50" Height="50"
                                                  HorizontalAlignment="Center"
                                                  VerticalAlignment="Center"
-                                                 Foreground="{StaticResource NeuroTextDimBrush}"
+                                                 Foreground="{DynamicResource NeuroTextDimBrush}"
                                                  Opacity="0.5"/>
                     </Border>
                     <TextBlock Text="还没有添加任何应用"
                                FontSize="18"
-                               Foreground="{StaticResource NeuroTextDimBrush}"
+                               Foreground="{DynamicResource NeuroTextDimBrush}"
                                HorizontalAlignment="Center"
                                Margin="0,20,0,8"/>
                     <TextBlock Text="点击上方「添加应用」按钮开始添加"
                                FontSize="14"
-                               Foreground="{StaticResource NeuroTextDimBrush}"
+                               Foreground="{DynamicResource NeuroTextDimBrush}"
                                Opacity="0.5"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
 
-            <!-- 加载遮罩（Neumorphic 凹陷叠加层） -->
+            <!-- 加载遮罩 -->
             <Border Grid.ColumnSpan="2"
-                    Background="#CC1E1E28"
+                    Background="{DynamicResource NeuroDarkShadowBrush}"
+                    Opacity="0.75"
                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Border Width="100" Height="100"
                         CornerRadius="28"
-                        Background="{StaticResource NeuroBackgroundBrush}"
+                        Background="{DynamicResource NeuroBackgroundBrush}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="16" ShadowDepth="6" Direction="135"
-                                          Color="#1E1E28" Opacity="0.7"/>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="8" Direction="135"
+                                          Color="{DynamicResource NeuroDarkShadow}" Opacity="0.7"/>
                     </Border.Effect>
                     <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                  IsIndeterminate="True"
                                  Width="50" Height="50"
-                                 Foreground="{StaticResource NeuroAccentBrush}"/>
+                                 Foreground="{DynamicResource NeuroAccentBrush}"/>
                 </Border>
             </Border>
         </Grid>

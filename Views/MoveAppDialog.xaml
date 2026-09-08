@@ -4,28 +4,28 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:converters="clr-namespace:AiDaBenYing.Converters"
              Width="420"
-             Background="#2A2A38">
+             Background="{DynamicResource NeuroBackgroundBrush}">
 
     <UserControl.Resources>
         <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
     </UserControl.Resources>
 
     <Border CornerRadius="20"
-            Background="#2A2A38"
+            Background="{DynamicResource NeuroBackgroundBrush}"
             Margin="4">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="8" Direction="315"
-                              Color="#3A3A4C" Opacity="0.6"/>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="10" Direction="315"
+                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
         </Border.Effect>
 
-        <StackPanel Margin="28,28,28,28">
+        <StackPanel Margin="28">
             <!-- 标题 -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                 <Border Width="44" Height="44" CornerRadius="12"
-                        Background="#06B6D4">
+                        Background="{DynamicResource NeuroAccent2Brush}">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="315"
-                                          Color="#3A3A4C" Opacity="0.6"/>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
                     </Border.Effect>
                     <materialDesign:PackIcon Kind="FolderMove"
                                              Width="26" Height="26"
@@ -37,50 +37,39 @@
                     <TextBlock Text="移动应用到"
                                FontSize="22"
                                FontWeight="Bold"
-                               Foreground="#C4C4D4"/>
+                               Foreground="{DynamicResource NeuroTextBrush}"/>
                     <TextBlock x:Name="AppNameTextBlock"
                                FontSize="13"
-                               Foreground="#8888A0"
+                               Foreground="{DynamicResource NeuroTextDimBrush}"
                                Margin="0,3,0,0"/>
                 </StackPanel>
             </StackPanel>
 
             <!-- 分类列表（Neumorphic 凹陷容器） -->
             <Border CornerRadius="12"
-                    Background="#222230"
+                    Background="{DynamicResource NeuroInsetBrush}"
                     Margin="0,16,0,0"
                     MaxHeight="320">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
-                                      Color="#1E1E28" Opacity="0.65"/>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="5" Direction="135"
+                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.65"/>
                 </Border.Effect>
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              Padding="8,8">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="8">
                     <ItemsControl x:Name="CategoriesItemsControl">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Style="{StaticResource NeuroFlatButton}"
+                                <Button Style="{DynamicResource NeuroFlatButton}"
                                         HorizontalContentAlignment="Left"
                                         Margin="4,6"
                                         Padding="12,10"
                                         Click="Category_Click"
                                         Tag="{Binding}"
-                                        Foreground="#C4C4D4">
+                                        Foreground="{DynamicResource NeuroTextBrush}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Border Width="36" Height="36"
-                                                CornerRadius="10"
-                                                Background="{Binding Color, Converter={StaticResource StringToColorBrushConverter}}"
-                                                Opacity="0.25">
-                                            <Border.Effect>
-                                                <DropShadowEffect BlurRadius="6" ShadowDepth="3"
-                                                                  Direction="315" Color="#3A3A4C" Opacity="0.4"/>
-                                            </Border.Effect>
-                                        </Border>
                                         <materialDesign:PackIcon Kind="{Binding Icon}"
                                                                  Width="22" Height="22"
                                                                  VerticalAlignment="Center"
-                                                                 Foreground="{Binding Color, Converter={StaticResource StringToColorBrushConverter}}"
-                                                                 Margin="0,0,0,0"/>
+                                                                 Foreground="{Binding Color, Converter={StaticResource StringToColorBrushConverter}}"/>
                                         <TextBlock Text="{Binding Name}"
                                                    FontSize="15"
                                                    Margin="12,0,0,0"
@@ -94,9 +83,9 @@
             </Border>
 
             <!-- 取消按钮 -->
-            <Button Style="{StaticResource NeuroButton}"
+            <Button Style="{DynamicResource NeuroButton}"
                     Content="取消"
-                    Foreground="#8888A0"
+                    Foreground="{DynamicResource NeuroTextDimBrush}"
                     HorizontalAlignment="Left"
                     Margin="0,20,0,0"
                     Padding="18,10"

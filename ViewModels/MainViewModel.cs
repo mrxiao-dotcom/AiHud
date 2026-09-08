@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using AiDaBenYing;
 using AiDaBenYing.Converters;
 using AiDaBenYing.Models;
 using AiDaBenYing.Services;
@@ -372,11 +373,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ToggleTheme()
     {
-        IsDarkMode = !IsDarkMode;
-        var paletteHelper = new MaterialDesignThemes.Wpf.PaletteHelper();
-        var theme = paletteHelper.GetTheme();
-        theme.SetBaseTheme(IsDarkMode ? MaterialDesignThemes.Wpf.BaseTheme.Dark : MaterialDesignThemes.Wpf.BaseTheme.Light);
-        paletteHelper.SetTheme(theme);
+        ThemeManager.ToggleTheme();
+        IsDarkMode = ThemeManager.CurrentTheme == AppTheme.Dark;
     }
 
     [RelayCommand]

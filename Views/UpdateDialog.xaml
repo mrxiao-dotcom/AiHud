@@ -6,13 +6,13 @@
         Height="540" Width="660"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#2A2A38"
-        Foreground="#C4C4D4"
+        Background="{DynamicResource NeuroBackgroundBrush}"
+        Foreground="{DynamicResource NeuroTextBrush}"
         FontFamily="Segoe UI">
 
     <Window.Resources>
         <Style TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#C4C4D4"/>
+            <Setter Property="Foreground" Value="{DynamicResource NeuroTextBrush}"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
     </Window.Resources>
@@ -30,16 +30,17 @@
         <Border Grid.Row="0"
                 Margin="0,0,0,18"
                 CornerRadius="16"
-                Background="#2A2A38">
+                Background="{DynamicResource NeuroBackgroundBrush}">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315" Color="#3A3A4C" Opacity="0.55"/>
+                <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="315"
+                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
             </Border.Effect>
             <StackPanel Orientation="Horizontal" Margin="4">
-                <!-- Neumorphic 图标容器 -->
                 <Border Width="52" Height="52" CornerRadius="14"
-                        Background="#8B5CF6">
+                        Background="{DynamicResource NeuroAccentBrush}">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="315" Color="#3A3A4C" Opacity="0.6"/>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
                     </Border.Effect>
                     <materialDesign:PackIcon Kind="Update"
                                              Width="30" Height="30"
@@ -48,37 +49,42 @@
                                              VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel VerticalAlignment="Center" Margin="16,0,0,0">
-                    <TextBlock Text="发现新版本" FontSize="22" FontWeight="Bold" Foreground="#C4C4D4"/>
+                    <TextBlock Text="发现新版本" FontSize="22" FontWeight="Bold"
+                               Foreground="{DynamicResource NeuroTextBrush}"/>
                     <TextBlock x:Name="TxtVersionInfo" FontSize="13"
-                               Foreground="#8888A0" Margin="0,4,0,0"/>
+                               Foreground="{DynamicResource NeuroTextDimBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
             </StackPanel>
         </Border>
 
-        <!-- 强制更新警告（Neumorphic 凹陷警示条） -->
+        <!-- 强制更新警告 -->
         <Border Grid.Row="1" x:Name="ForcePanel"
                 CornerRadius="10" Padding="14,10" Margin="0,0,0,14"
-                Background="#222230" Visibility="Collapsed">
+                Background="{DynamicResource NeuroInsetBrush}"
+                Visibility="Collapsed">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="6" ShadowDepth="2" Direction="135" Color="#1E1E28" Opacity="0.7"/>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="2" Direction="135"
+                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.7"/>
             </Border.Effect>
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="AlertCircle"
-                                         Foreground="#F59E0B"
+                                         Foreground="{DynamicResource NeuroWarningBrush}"
                                          Width="22" Height="22"
                                          VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBlock Text="本次为强制更新，必须升级后才能继续使用。"
-                           Foreground="#F59E0B" VerticalAlignment="Center"
+                           Foreground="{DynamicResource NeuroWarningBrush}"
+                           VerticalAlignment="Center"
                            FontSize="13"/>
             </StackPanel>
         </Border>
 
-        <!-- 元数据区（Neumorphic 凹陷卡片） -->
+        <!-- 元数据区 -->
         <Border Grid.Row="2"
                 CornerRadius="12" Padding="16,12" Margin="0,0,0,14"
-                Background="#222230">
+                Background="{DynamicResource NeuroInsetBrush}">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135" Color="#1E1E28" Opacity="0.65"/>
+                <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
+                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.65"/>
             </Border.Effect>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -92,93 +98,105 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="新版本号：" Foreground="#8888A0" FontSize="13"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="新版本号："
+                           Foreground="{DynamicResource NeuroTextDimBrush}" FontSize="13"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtNewVersion"
-                           FontWeight="Bold" FontSize="14" Foreground="#8B5CF6"/>
+                           FontWeight="Bold" FontSize="14"
+                           Foreground="{DynamicResource NeuroAccentBrush}"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="发布日期：" Foreground="#8888A0" FontSize="13" Margin="16,0,0,0"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtReleaseDate" FontSize="13"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="发布日期："
+                           Foreground="{DynamicResource NeuroTextDimBrush}"
+                           FontSize="13" Margin="16,0,0,0"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" x:Name="TxtReleaseDate" FontSize="13"
+                           Foreground="{DynamicResource NeuroTextBrush}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="包大小：" Foreground="#8888A0" FontSize="13" Margin="0,10,0,0"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtFileSize" FontSize="13" Margin="0,10,0,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="包大小："
+                           Foreground="{DynamicResource NeuroTextDimBrush}"
+                           FontSize="13" Margin="0,10,0,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtFileSize"
+                           FontSize="13" Foreground="{DynamicResource NeuroTextBrush}"
+                           Margin="0,10,0,0"/>
             </Grid>
         </Border>
 
-        <!-- 更新说明（Neumorphic 凹陷面板） -->
+        <!-- 更新说明 -->
         <Border Grid.Row="3" CornerRadius="12">
             <Border.Background>
-                <SolidColorBrush Color="#222230"/>
+                <DynamicResource ResourceKey="NeuroInsetBrush"/>
             </Border.Background>
             <Border.Effect>
-                <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="135" Color="#1E1E28" Opacity="0.6"/>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="135"
+                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.6"/>
             </Border.Effect>
             <DockPanel>
-                <!-- 标题栏（内嵌凸起条） -->
                 <Border DockPanel.Dock="Top"
                         CornerRadius="12,12,0,0"
-                        Background="#2A2A38"
+                        Background="{DynamicResource NeuroBackgroundBrush}"
                         Padding="16,10">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315" Color="#3A3A4C" Opacity="0.4"/>
+                        <DropShadowEffect BlurRadius="6" ShadowDepth="3" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.4"/>
                     </Border.Effect>
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="FormatListBulleted"
                                                  Width="18" Height="18"
-                                                 Foreground="#8B5CF6"
+                                                 Foreground="{DynamicResource NeuroAccentBrush}"
                                                  VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBlock Text="更新说明" FontWeight="SemiBold" FontSize="14" Foreground="#C4C4D4"/>
+                        <TextBlock Text="更新说明" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource NeuroTextBrush}"/>
                     </StackPanel>
                 </Border>
-                <!-- 内容 -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16,12">
                     <TextBlock x:Name="TxtDescription"
                                TextWrapping="Wrap"
                                LineHeight="24"
                                FontSize="14"
-                               Foreground="#C4C4D4"/>
+                               Foreground="{DynamicResource NeuroTextBrush}"/>
                 </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <!-- Neumorphic 凹陷进度条 -->
-        <Border Grid.Row="4" x:Name="ProgressPanel"
-                Visibility="Collapsed" Margin="0,16,0,0">
-            <StackPanel>
-                <TextBlock x:Name="TxtProgress" FontSize="13" Foreground="#8888A0" Margin="0,0,0,8"/>
-                <Border CornerRadius="6" Height="10">
-                    <Border.Background>
-                        <SolidColorBrush Color="#222230"/>
-                    </Border.Background>
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="4" ShadowDepth="2" Direction="135" Color="#1E1E28" Opacity="0.5"/>
-                    </Border.Effect>
-                    <Border x:Name="ProgressBarTrack" CornerRadius="6" Background="#353548">
-                        <Border x:Name="ProgressBarFill" CornerRadius="6"
-                                Background="#8B5CF6" HorizontalAlignment="Left"
-                                Width="0">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="6" ShadowDepth="0" Color="#8B5CF6" Opacity="0.5"/>
-                            </Border.Effect>
-                        </Border>
+        <!-- 进度区（Neumorphic 自定义进度条） -->
+        <StackPanel Grid.Row="4" x:Name="ProgressPanel"
+                    Visibility="Collapsed" Margin="0,16,0,0">
+            <TextBlock x:Name="TxtProgress" FontSize="13"
+                       Foreground="{DynamicResource NeuroTextDimBrush}" Margin="0,0,0,8"/>
+            <Border CornerRadius="6" Height="10">
+                <Border.Background>
+                    <DynamicResource ResourceKey="NeuroInsetBrush"/>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="4" ShadowDepth="2" Direction="135"
+                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.5"/>
+                </Border.Effect>
+                <Border x:Name="ProgressBarTrack" CornerRadius="6"
+                        Background="{DynamicResource NeuroHighlightBrush}">
+                    <Border x:Name="ProgressBarFill" CornerRadius="6"
+                            Background="{DynamicResource NeuroAccentBrush}"
+                            HorizontalAlignment="Left" Width="0">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="6" ShadowDepth="0"
+                                              Color="{DynamicResource NeuroAccent}" Opacity="0.5"/>
+                        </Border.Effect>
                     </Border>
                 </Border>
-            </StackPanel>
-        </Border>
+            </Border>
+        </StackPanel>
 
         <!-- 按钮行 -->
         <StackPanel Grid.Row="4" Orientation="Horizontal"
                     HorizontalAlignment="Right" Margin="0,18,0,0">
             <Button x:Name="BtnLater"
-                    Style="{StaticResource NeuroButton}"
+                    Style="{DynamicResource NeuroButton}"
                     Content="稍后提醒"
-                    Foreground="#8888A0"
+                    Foreground="{DynamicResource NeuroTextDimBrush}"
                     Padding="20,10"
                     Margin="0,0,10,0"
                     Click="BtnLater_Click"/>
             <Button x:Name="BtnUpdate"
-                    Style="{StaticResource NeuroPrimaryButton}"
+                    Style="{DynamicResource NeuroPrimaryButton}"
                     Content="立即更新"
-                    Foreground="#8B5CF6"
+                    Foreground="{DynamicResource NeuroAccentBrush}"
                     Padding="20,10"
                     Click="BtnUpdate_Click"/>
         </StackPanel>

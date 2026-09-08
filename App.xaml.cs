@@ -69,6 +69,9 @@ public partial class App : Application
             // 跳过 License 弹窗，启动后自动打开应用市场，加载成功立即关闭，回到主界面。
             var isMarketTest = e.Args != null && Array.IndexOf(e.Args, "--market-test") >= 0;
 
+            // 0) 初始化 Neumorphism 主题管理器
+            ThemeManager.Initialize();
+
             // 1) 解析服务器地址（环境变量 > App.config > 默认），并初始化 LicenseManager
             _serverUrl = ConfigurationManager.AppSettings["LicenseServerUrl"]
                          ?? Environment.GetEnvironmentVariable("AIHUD_LICENSE_SERVER")

@@ -9,8 +9,8 @@
                 <!-- Material Design 基础（保留以获取 PackIcon 等控件） -->
                 <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Cyan" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
-                <!-- Neumorphism 风格资源（覆盖 Material Design 默认样式） -->
-                <ResourceDictionary Source="NeumorphismTheme.xaml"/>
+                <!-- Neumorphism 深色主题（初始加载） -->
+                <ResourceDictionary Source="NeumorphismDark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
