@@ -11,6 +11,15 @@ namespace AiDaBenYing.Services;
 
 public class DataService
 {
+    /// <summary>
+    /// 仅 Debug 模式输出日志。Release 中调用会被编译器完全剔除。
+    /// </summary>
+    [System.Diagnostics.Conditional("DEBUG")]
+    private static void DebugLog(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(message);
+    }
+
     private static readonly string AppDataFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "AiHUD"
@@ -51,7 +60,7 @@ public class DataService
             if (File.Exists(DataFilePath))
             {
                 var json = await File.ReadAllTextAsync(DataFilePath);
-                System.Diagnostics.Debug.WriteLine($"[DataService.LoadDataAsync] 读取到 JSON 长度: {json?.Length ?? 0}");
+                DebugLog($"[DataService.LoadDataAsync] 读取到 JSON 长度: {json?.Length ?? 0}");
                 var surrogate = JsonSerializer.Deserialize<AppDataSerializationSurrogate>(json!, JsonOptions);
                 if (surrogate != null)
                 {
@@ -62,7 +71,7 @@ public class DataService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}\n{ex.StackTrace}");
+            DebugLog($"Error loading data: {ex.Message}\n{ex.StackTrace}");
         }
 
         return CreateDefaultData();
@@ -74,13 +83,13 @@ public class DataService
         {
             var surrogate = AppDataSerializationSurrogate.FromAppData(data);
             var json = JsonSerializer.Serialize(surrogate, JsonOptions);
-            System.Diagnostics.Debug.WriteLine($"[DataService.SaveDataAsync] 保存 JSON 长度: {json?.Length ?? 0}");
+            DebugLog($"[DataService.SaveDataAsync] 保存 JSON 长度: {json?.Length ?? 0}");
             await File.WriteAllTextAsync(DataFilePath, json);
-            System.Diagnostics.Debug.WriteLine($"[DataService.SaveDataAsync] 保存成功!");
+            DebugLog($"[DataService.SaveDataAsync] 保存成功!");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving data: {ex.Message}\n{ex.StackTrace}");
+            DebugLog($"Error saving data: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
@@ -100,7 +109,7 @@ public class DataService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving data: {ex.Message}\n{ex.StackTrace}");
+            DebugLog($"Error saving data: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
@@ -116,7 +125,7 @@ public class DataService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error loading settings: {ex.Message}");
+            DebugLog($"Error loading settings: {ex.Message}");
         }
 
         return new AppSettings();
@@ -131,7 +140,7 @@ public class DataService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
+            DebugLog($"Error saving settings: {ex.Message}");
         }
     }
 

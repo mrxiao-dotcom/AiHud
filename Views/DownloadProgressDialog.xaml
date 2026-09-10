@@ -1,0 +1,92 @@
+<Window x:Class="AiDaBenYing.Views.DownloadProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="正在下载应用…"
+        Height="240" Width="520"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource NeuroBackgroundBrush}"
+        Foreground="{DynamicResource NeuroTextBrush}"
+        TextElement.Foreground="{DynamicResource NeuroTextBrush}"
+        FontFamily="Segoe UI">
+
+    <Border CornerRadius="20" Margin="6"
+            Background="{DynamicResource NeuroBackgroundBrush}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="10" Direction="315"
+                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
+        </Border.Effect>
+
+        <Grid Margin="28">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题 -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                <Border Width="44" Height="44" CornerRadius="12"
+                        Background="{DynamicResource NeuroAccentBrush}">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
+                    </Border.Effect>
+                    <materialDesign:PackIcon Kind="Download"
+                                             Width="26" Height="26"
+                                             Foreground="White"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
+                    <TextBlock Text="正在下载并安装…"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource NeuroTextBrush}"/>
+                    <TextBlock x:Name="TxtAppName"
+                               FontSize="13"
+                               Foreground="{DynamicResource NeuroTextDimBrush}"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 进度条 -->
+            <Border Grid.Row="1" CornerRadius="8" Height="14"
+                    Background="{DynamicResource NeuroInsetBrush}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="4" ShadowDepth="2" Direction="135"
+                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.5"/>
+                </Border.Effect>
+                <Border x:Name="ProgressFill"
+                        CornerRadius="8"
+                        HorizontalAlignment="Left"
+                        Width="0"
+                        Background="{DynamicResource NeuroAccentBrush}">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="6" ShadowDepth="0"
+                                          Color="{DynamicResource NeuroAccent}" Opacity="0.6"/>
+                    </Border.Effect>
+                </Border>
+            </Border>
+
+            <!-- 文案 -->
+            <TextBlock Grid.Row="2"
+                       x:Name="TxtProgress"
+                       VerticalAlignment="Center"
+                       Margin="0,12,0,0"
+                       FontSize="13"
+                       Foreground="{DynamicResource NeuroTextDimBrush}"
+                       TextWrapping="Wrap"/>
+
+            <!-- 取消提示 -->
+            <TextBlock Grid.Row="3"
+                       Text="窗口关闭后下载会自动取消，请耐心等待…"
+                       FontSize="11"
+                       Foreground="{DynamicResource NeuroTextDimBrush}"
+                       Opacity="0.7"/>
+        </Grid>
+    </Border>
+</Window>

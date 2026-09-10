@@ -20,16 +20,16 @@ public static class IconExtractor
         {
             if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIcon] 文件不存在: {exePath}");
+                DebugLog($"[IconExtractor.ExtractIcon] 文件不存在: {exePath}");
                 return null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIcon] 开始提取: {exePath}");
+            DebugLog($"[IconExtractor.ExtractIcon] 开始提取: {exePath}");
 
             IntPtr iconHandle = ExtractIcon(IntPtr.Zero, exePath, 0);
             if (iconHandle == IntPtr.Zero)
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIcon] 无法获取图标句柄");
+                DebugLog($"[IconExtractor.ExtractIcon] 无法获取图标句柄");
                 return null;
             }
 
@@ -37,7 +37,7 @@ public static class IconExtractor
             {
                 var icon = System.Drawing.Icon.FromHandle(iconHandle);
                 var bitmapImage = IconToBitmapImage(icon);
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIcon] 成功: {bitmapImage != null}");
+                DebugLog($"[IconExtractor.ExtractIcon] 成功: {bitmapImage != null}");
                 return bitmapImage;
             }
             finally
@@ -47,7 +47,7 @@ public static class IconExtractor
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIcon] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.ExtractIcon] 异常: {ex.Message}");
             return null;
         }
     }
@@ -77,7 +77,7 @@ public static class IconExtractor
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.IconToBitmapImage] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.IconToBitmapImage] 异常: {ex.Message}");
             return null;
         }
     }
@@ -88,26 +88,26 @@ public static class IconExtractor
         {
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIconFromFile] 文件不存在: {filePath}");
+                DebugLog($"[IconExtractor.ExtractIconFromFile] 文件不存在: {filePath}");
                 return null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIconFromFile] 开始: {filePath}");
+            DebugLog($"[IconExtractor.ExtractIconFromFile] 开始: {filePath}");
 
             var icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
             if (icon == null)
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIconFromFile] 无法提取关联图标");
+                DebugLog($"[IconExtractor.ExtractIconFromFile] 无法提取关联图标");
                 return null;
             }
 
             var bitmapImage = IconToBitmapImage(icon);
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIconFromFile] 成功: {bitmapImage != null}");
+            DebugLog($"[IconExtractor.ExtractIconFromFile] 成功: {bitmapImage != null}");
             return bitmapImage;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.ExtractIconFromFile] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.ExtractIconFromFile] 异常: {ex.Message}");
             return null;
         }
     }
@@ -130,7 +130,7 @@ public static class IconExtractor
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadBitmapFromFile] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.LoadBitmapFromFile] 异常: {ex.Message}");
             return null;
         }
     }
@@ -141,12 +141,12 @@ public static class IconExtractor
         {
             if (string.IsNullOrEmpty(iconPath) || !File.Exists(iconPath))
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIconFile] 文件不存在: {iconPath}");
+                DebugLog($"[IconExtractor.LoadIconFile] 文件不存在: {iconPath}");
                 return null;
             }
 
             var extension = Path.GetExtension(iconPath).ToLowerInvariant();
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIconFile] 类型: {extension}");
+            DebugLog($"[IconExtractor.LoadIconFile] 类型: {extension}");
 
             BitmapImage? result = null;
 
@@ -160,12 +160,12 @@ public static class IconExtractor
                 result = LoadBitmapFromFile(iconPath);
             }
 
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIconFile] 结果: {result != null}");
+            DebugLog($"[IconExtractor.LoadIconFile] 结果: {result != null}");
             return result;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIconFile] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.LoadIconFile] 异常: {ex.Message}");
             return null;
         }
     }
@@ -186,7 +186,7 @@ public static class IconExtractor
 
             if (reserved != 0 || type != 1 || count == 0)
             {
-                System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIcoFile] 无效的 ICO 文件格式");
+                DebugLog($"[IconExtractor.LoadIcoFile] 无效的 ICO 文件格式");
                 return null;
             }
 
@@ -233,7 +233,7 @@ public static class IconExtractor
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[IconExtractor.LoadIcoFile] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.LoadIcoFile] 异常: {ex.Message}");
 
             // 最后的后备方案：直接用路径构造 Icon
             try
@@ -246,5 +246,14 @@ public static class IconExtractor
                 return null;
             }
         }
+    }
+
+    /// <summary>
+    /// 仅 Debug 模式输出日志。Release 中整个调用会被编译器完全剔除，避免污染输出窗口。
+    /// </summary>
+    [System.Diagnostics.Conditional("DEBUG")]
+    private static void DebugLog(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(message);
     }
 }

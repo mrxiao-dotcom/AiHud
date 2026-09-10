@@ -20,18 +20,6 @@ public partial class MainViewModel : ObservableObject
     private readonly DataService _dataService;
     private readonly AppLauncherService _launcherService;
     private AppData? _appData;
-    private static readonly string LogFile = @"d:\CSharpProjects\AiHUD\viewmodel_log.txt";
-
-    private void Log(string message)
-    {
-        try
-        {
-            var logMessage = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
-            System.IO.File.AppendAllText(LogFile, logMessage + Environment.NewLine);
-            System.Diagnostics.Debug.WriteLine(logMessage);
-        }
-        catch { }
-    }
 
     [ObservableProperty]
     private ObservableCollection<Category> _categories = new();
@@ -41,7 +29,10 @@ public partial class MainViewModel : ObservableObject
     private Category? _selectedCategory;
 
     private ObservableCollection<AppItem> _allApps = new();
-    public ObservableCollection<AppItem> AllApps => _allApps;
+    public ObservableCollection<AppItem> AllApps
+    {
+        get => _allApps;
+    }
 
     [ObservableProperty]
     private AppItem? _selectedAppItem;
@@ -66,7 +57,7 @@ public partial class MainViewModel : ObservableObject
         get
         {
             var count = _filteredAppsView?.Cast<object>()?.Count() ?? -1;
-            Log($"[FilteredApps GET] _filteredAppsView count: {count}");
+            DebugLog($"[FilteredApps GET] _filteredAppsView count: {count}");
             return _filteredAppsView;
         }
     }
@@ -100,22 +91,53 @@ public partial class MainViewModel : ObservableObject
         _dataService = new DataService();
         _launcherService = new AppLauncherService();
         _launcherService.AppLaunched += OnAppLaunched;
+
+        // 监听数据集合变化，自动通知 HasNoApps
+        _allApps.CollectionChanged += (s, e) => OnPropertyChanged(nameof(HasNoApps));
+        Categories.CollectionChanged += OnCategoriesChanged;
+    }
+
+    private void OnCategoriesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        // 当分类增删时，重新订阅每个分类下 AppItems 的变化
+        if (e.OldItems != null)
+            foreach (Category c in e.OldItems)
+                c.AppItems.CollectionChanged -= OnCategoryAppsChanged;
+        if (e.NewItems != null)
+            foreach (Category c in e.NewItems)
+                c.AppItems.CollectionChanged += OnCategoryAppsChanged;
+
+        OnPropertyChanged(nameof(HasNoApps));
+    }
+
+    private void OnCategoryAppsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(HasNoApps));
     }
 
     partial void OnSelectedCategoryChanged(Category? value)
     {
-        Log($"[OnSelectedCategoryChanged] Entered with value: {value?.Name ?? "null"}");
+        DebugLog($"[OnSelectedCategoryChanged] Entered with value: {value?.Name ?? "null"}");
+
+        // 如果是"全部应用"且已初始化视图，无需重置（避免丢失数据）
+        if (value == null && _filteredAppsView != null && _filteredAppsView.SourceCollection == _allApps)
+        {
+            OnPropertyChanged(nameof(HasNoApps));
+            OnPropertyChanged(nameof(FilteredApps));
+            OnPropertyChanged(nameof(IsAllCategories));
+            return;
+        }
 
         // Set the FilteredAppsView FIRST before notifying
         if (value == null)
         {
-            Log($"[OnSelectedCategoryChanged] Setting FilteredAppsView to AllApps, count: {_allApps.Count}");
+            DebugLog($"[OnSelectedCategoryChanged] Setting FilteredAppsView to AllApps, count: {_allApps.Count}");
             _filteredAppsView = CollectionViewSource.GetDefaultView(_allApps);
             _filteredAppsView.Filter = FilterAppItems;
         }
         else
         {
-            Log($"[OnSelectedCategoryChanged] Setting FilteredAppsView to category: {value.Name}, count: {value.AppItems.Count}");
+            DebugLog($"[OnSelectedCategoryChanged] Setting FilteredAppsView to category: {value.Name}, count: {value.AppItems.Count}");
             _filteredAppsView = CollectionViewSource.GetDefaultView(value.AppItems);
             _filteredAppsView.Filter = FilterAppItems;
         }
@@ -125,7 +147,7 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(FilteredApps));
         OnPropertyChanged(nameof(IsAllCategories));
 
-        Log($"[OnSelectedCategoryChanged] Exit");
+        DebugLog($"[OnSelectedCategoryChanged] Exit");
     }
 
     private void OnSelectedCategoryAppItemsChanged(object? sender, EventArgs e)
@@ -174,11 +196,25 @@ public partial class MainViewModel : ObservableObject
                 }
             }
 
+            // 初始化过滤视图（必须在 SelectedCategory = null 之前）
+            _filteredAppsView = CollectionViewSource.GetDefaultView(_allApps);
+            _filteredAppsView.Filter = FilterAppItems;
+
+            // 给加载后的分类订阅 AppItems 变化（构造函数时 Categories 还是空的）
+            foreach (var category in Categories)
+            {
+                category.AppItems.CollectionChanged -= OnCategoryAppsChanged;
+                category.AppItems.CollectionChanged += OnCategoryAppsChanged;
+            }
+
             // 异步加载所有应用图标
             _ = Task.Run(() => LoadAllAppIcons());
 
             // 默认显示全部应用（SelectedCategory = null）
             SelectedCategory = null;
+
+            // 主动通知一次
+            OnPropertyChanged(nameof(HasNoApps));
         }
         finally
         {
@@ -263,10 +299,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void AddApp()
     {
-        System.Diagnostics.Debug.WriteLine("[MainViewModel.AddApp] 开始添加应用");
+        DebugLog("[MainViewModel.AddApp] 开始添加应用");
         if (SelectedCategory == null)
         {
-            System.Diagnostics.Debug.WriteLine("[MainViewModel.AddApp] SelectedCategory 为 null，无法添加");
+            DebugLog("[MainViewModel.AddApp] SelectedCategory 为 null，无法添加");
             return;
         }
 
@@ -290,7 +326,7 @@ public partial class MainViewModel : ObservableObject
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[MainViewModel.AddApp] 选择文件: {exePath}, 名称: {appName}");
+            DebugLog($"[MainViewModel.AddApp] 选择文件: {exePath}, 名称: {appName}");
 
             var appItem = new AppItem(appName, exePath, null);
             appItem.EnsureIconLoaded(); // 加载图标
@@ -469,5 +505,14 @@ public partial class MainViewModel : ObservableObject
             _appData.Categories = Categories;
             await _dataService.SaveDataAsync(_appData);
         }
+    }
+
+    /// <summary>
+    /// 仅 Debug 模式输出日志。Release 中调用会被编译器完全剔除。
+    /// </summary>
+    [System.Diagnostics.Conditional("DEBUG")]
+    private static void DebugLog(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(message);
     }
 }

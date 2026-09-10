@@ -218,11 +218,9 @@
                                     <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
                                                       Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
                                 </Border.Effect>
-                                <materialDesign:PackIcon Kind="Robot"
-                                                         Width="28" Height="28"
-                                                         Foreground="White"
-                                                         HorizontalAlignment="Center"
-                                                         VerticalAlignment="Center"/>
+                                <Image Source="/logo.png"
+                                       Width="32" Height="32"
+                                       Stretch="Uniform"/>
                             </Border>
                             <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="AI大本营"
@@ -412,6 +410,17 @@
 
                         <Button Style="{DynamicResource NeuroFlatButton}"
                                 HorizontalAlignment="Left"
+                                Click="ShowSettings_Click"
+                                Foreground="{DynamicResource NeuroTextBrush}"
+                                Padding="10,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CogOutline" Width="18" Height="18"/>
+                                <TextBlock Text="系统设置" Margin="10,0,0,0" FontSize="13"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{DynamicResource NeuroFlatButton}"
+                                HorizontalAlignment="Left"
                                 Click="ShowLicense_Click"
                                 Foreground="{DynamicResource NeuroTextBrush}"
                                 Padding="10,8">
@@ -494,7 +503,6 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button Style="{DynamicResource NeuroPrimaryButton}"
                                         Command="{Binding AddAppCommand}"
-                                        Foreground="{DynamicResource NeuroAccentBrush}"
                                         Padding="18,10"
                                         Margin="0,0,10,0">
                                     <StackPanel Orientation="Horizontal">

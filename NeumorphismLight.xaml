@@ -89,6 +89,9 @@
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="Padding" Value="20,12"/>
         <Setter Property="MinWidth" Value="88"/>
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -162,10 +165,12 @@
         </Setter>
     </Style>
 
-    <!-- 主按钮（强调色边框） -->
+    <!-- 主按钮（强调色填充，纯色按钮，无外圈） -->
     <Style x:Key="NeuroPrimaryButton" TargetType="Button" BasedOn="{StaticResource NeuroButton}">
-        <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
         <Setter Property="MinWidth" Value="88"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -173,45 +178,40 @@
                         <Border x:Name="LightShadowBorder"
                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}">
+                                Background="{DynamicResource NeuroAccentBrush}">
                             <Border.Effect>
-                                <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="315"
-                                                  Color="{DynamicResource NeuroLightShadow}" Opacity="0.95"/>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="4" Direction="315"
+                                                  Color="{DynamicResource NeuroAccent}" Opacity="0.3"/>
                             </Border.Effect>
                         </Border>
-                        <Border x:Name="DarkShadowBorder"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="135"
-                                                  Color="{DynamicResource NeuroDarkShadow}" Opacity="0.85"/>
-                            </Border.Effect>
-                        </Border>
-                        <Border x:Name="ContentBorder"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                CornerRadius="14"
-                                Background="{DynamicResource NeuroBackgroundBrush}"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                                <Border x:Name="ContentBorder"
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                        CornerRadius="14"
+                                        Background="{DynamicResource NeuroAccentBrush}"
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      TextBlock.Foreground="White"/>
+                                </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ContentBorder" Property="Effect">
+                            <Setter TargetName="LightShadowBorder" Property="Effect">
                                 <Setter.Value>
-                                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Direction="0"
-                                                      Color="{DynamicResource NeuroAccent}" Opacity="0.2"/>
+                                    <DropShadowEffect BlurRadius="14" ShadowDepth="6" Direction="315"
+                                                      Color="{DynamicResource NeuroAccent}" Opacity="0.5"/>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="LightShadowBorder" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="DarkShadowBorder" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="ContentBorder" Property="Background"
-                                    Value="{DynamicResource NeuroInsetBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource NeuroAccentBrush}"/>
+                            <Setter TargetName="ContentBorder" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="6" ShadowDepth="2" Direction="135"
+                                                      Color="{DynamicResource NeuroDarkShadow}" Opacity="0.6"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4"/>

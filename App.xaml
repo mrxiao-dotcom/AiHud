@@ -12,6 +12,12 @@
                 <!-- Neumorphism 深色主题（初始加载） -->
                 <ResourceDictionary Source="NeumorphismDark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- 全局默认按钮样式覆盖：阻断 MaterialDesign 的 Button 隐式样式（RaisedButton），
+                 避免给 Neumorphism 按钮叠加 Material 风格的 Padding / 边框 / 阴影。 -->
+            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

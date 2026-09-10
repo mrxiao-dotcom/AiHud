@@ -1,0 +1,166 @@
+<Window x:Class="AiDaBenYing.Views.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:viewmodels="clr-namespace:AiDaBenYing.ViewModels"
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        d:DataContext="{d:DesignInstance Type=viewmodels:SettingsViewModel}"
+        Title="系统设置"
+        Height="440" Width="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource NeuroBackgroundBrush}"
+        Foreground="{DynamicResource NeuroTextBrush}"
+        TextElement.Foreground="{DynamicResource NeuroTextBrush}"
+        FontFamily="Segoe UI">
+
+    <Border CornerRadius="20" Margin="6"
+            Background="{DynamicResource NeuroBackgroundBrush}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="10" Direction="315"
+                              Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
+        </Border.Effect>
+
+        <Grid Margin="28">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题 -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <Border Width="44" Height="44" CornerRadius="12"
+                        Background="{DynamicResource NeuroAccentBrush}">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="5" Direction="315"
+                                          Color="{DynamicResource NeuroLightShadow}" Opacity="0.6"/>
+                    </Border.Effect>
+                    <materialDesign:PackIcon Kind="CogOutline"
+                                             Width="26" Height="26"
+                                             Foreground="White"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
+                    <TextBlock Text="系统设置"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource NeuroTextBrush}"/>
+                    <TextBlock Text="配置应用市场下载、目录等参数"
+                               FontSize="13"
+                               Foreground="{DynamicResource NeuroTextDimBrush}"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 应用安装根目录 -->
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="应用安装根目录"
+                           FontSize="14"
+                           Foreground="{DynamicResource NeuroTextBrush}"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,6"/>
+                <TextBlock Text="留空时使用 AI大本营 所在目录下的 Apps 子目录。"
+                           FontSize="12"
+                           Foreground="{DynamicResource NeuroTextDimBrush}"
+                           Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,8">
+                    <Border CornerRadius="12" Background="{DynamicResource NeuroInsetBrush}">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="8" ShadowDepth="4" Direction="135"
+                                              Color="{DynamicResource NeuroDarkShadow}" Opacity="0.65"/>
+                        </Border.Effect>
+                    </Border>
+                    <Border CornerRadius="12"
+                            BorderBrush="{DynamicResource NeuroBorderBrush}"
+                            BorderThickness="1" Opacity="0.4"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding AppInstallRoot, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{DynamicResource NeuroTextBrush}"
+                                 CaretBrush="{DynamicResource NeuroAccentBrush}"
+                                 FontSize="13"
+                                 Padding="14,12"
+                                 VerticalContentAlignment="Center"
+                                 materialDesign:HintAssist.Hint="例如: D:\\MyApps"
+                                 materialDesign:HintAssist.Foreground="{DynamicResource NeuroTextDimBrush}"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"/>
+                        <Button Grid.Column="1"
+                                Style="{DynamicResource NeuroIconButton}"
+                                Margin="0,0,6,0"
+                                ToolTip="浏览…"
+                                Width="38" Height="38"
+                                Command="{Binding BrowseCommand}">
+                            <materialDesign:PackIcon Kind="FolderOpenOutline"
+                                                     Width="18" Height="18"
+                                                     Foreground="{DynamicResource NeuroAccent2Brush}"/>
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                    <materialDesign:PackIcon Kind="InformationOutline"
+                                             Width="14" Height="14"
+                                             VerticalAlignment="Center"
+                                             Foreground="{DynamicResource NeuroAccent2Brush}"
+                                             Margin="0,0,6,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="12"
+                               Foreground="{DynamicResource NeuroTextDimBrush}">
+                        <Run Text="将使用: "/>
+                        <Run Text="{Binding ResolvedPreview, Mode=OneWay}"
+                             FontWeight="SemiBold"
+                             Foreground="{DynamicResource NeuroTextBrush}"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Style="{DynamicResource NeuroFlatButton}"
+                            Content="恢复默认（程序目录/Apps）"
+                            Command="{Binding ResetToDefaultCommand}"
+                            Padding="12,6" Margin="0,0,8,0"/>
+                    <Button Style="{DynamicResource NeuroFlatButton}"
+                            Content="打开目录"
+                            Command="{Binding OpenInExplorerCommand}"
+                            Padding="12,6"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 状态信息 -->
+            <TextBlock Grid.Row="2"
+                       x:Name="TxtStatus"
+                       VerticalAlignment="Bottom"
+                       Margin="0,12,0,0"
+                       FontSize="12"
+                       Foreground="{DynamicResource NeuroTextDimBrush}"
+                       Text="{Binding StatusMessage}"/>
+
+            <!-- 按钮行 -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Style="{DynamicResource NeuroButton}"
+                        Content="取消"
+                        Foreground="{DynamicResource NeuroTextDimBrush}"
+                        Padding="22,10"
+                        Margin="0,0,10,0"
+                        IsCancel="True"
+                        Click="Cancel_Click"/>
+                <Button Style="{DynamicResource NeuroPrimaryButton}"
+                        Content="保存"
+                        Foreground="White"
+                        Padding="22,10"
+                        IsDefault="True"
+                        Click="Save_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

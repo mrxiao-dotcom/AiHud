@@ -109,12 +109,12 @@ public partial class AppItem : ObservableObject
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 加载图标: {pathToLoad}, IconPath={IconPath}, ExePath={ExecutablePath}");
+            DebugLog($"[AppItem.LoadIcon] 加载图标: {pathToLoad}, IconPath={IconPath}, ExePath={ExecutablePath}");
 
             if (System.IO.File.Exists(pathToLoad))
             {
                 var extension = System.IO.Path.GetExtension(pathToLoad).ToLowerInvariant();
-                System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 文件存在, 扩展名: {extension}");
+                DebugLog($"[AppItem.LoadIcon] 文件存在, 扩展名: {extension}");
                 if (extension == ".ico" || extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp")
                 {
                     Icon = IconExtractor.LoadIconFile(pathToLoad);
@@ -126,22 +126,31 @@ public partial class AppItem : ObservableObject
             }
             else if (System.IO.File.Exists(ExecutablePath))
             {
-                System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 主路径不存在，尝试 ExePath: {ExecutablePath}");
+                DebugLog($"[AppItem.LoadIcon] 主路径不存在，尝试 ExePath: {ExecutablePath}");
                 Icon = IconExtractor.ExtractIconFromFile(ExecutablePath);
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 文件都不存在");
+                DebugLog($"[AppItem.LoadIcon] 文件都不存在");
                 Icon = null;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 图标加载结果: {(Icon != null ? "成功" : "失败")}");
+            DebugLog($"[AppItem.LoadIcon] 图标加载结果: {(Icon != null ? "成功" : "失败")}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[AppItem.LoadIcon] 异常: {ex.Message}");
+            DebugLog($"[AppItem.LoadIcon] 异常: {ex.Message}");
             Icon = null;
         }
+    }
+
+    /// <summary>
+    /// 仅 Debug 模式输出日志，Release 中调用会被编译器完全剔除。
+    /// </summary>
+    [System.Diagnostics.Conditional("DEBUG")]
+    private static void DebugLog(string message)
+    {
+        System.Diagnostics.Debug.WriteLine(message);
     }
 
     public void RefreshIcon()

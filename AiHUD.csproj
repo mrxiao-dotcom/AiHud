@@ -13,8 +13,15 @@
     <Version>1.0.0</Version>
     <FileVersion>1.0.0.0</FileVersion>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <ApplicationIcon>Resources\TextIcon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\AiHudIcon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="logo.png" />
+    <Content Include="logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
@@ -23,11 +30,12 @@
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+    <PackageReference Include="SharpCompress" Version="0.48.0" />
   </ItemGroup>
 
-  <!-- 注册服务 SDK：复用 RegisterSrv 项目的 License/Update 能力 -->
+  <!-- 注册服务 SDK：从本地 NuGet 源引用 (RegisterSrv.ClientSDK 1.3.0) -->
   <ItemGroup>
-    <ProjectReference Include="D:\CSharpProjects\RegisterSrv\src\RegisterSrv.ClientSDK\RegisterSrv.ClientSDK.csproj" />
+    <PackageReference Include="RegisterSrv.ClientSDK" Version="1.3.1" />
   </ItemGroup>
 
 </Project>

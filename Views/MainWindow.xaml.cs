@@ -4,16 +4,15 @@ using System.Windows;
 using System.Windows.Controls;
 using AiDaBenYing.Models;
 using AiDaBenYing.Services;
+using AiDaBenYing.Services.Abstractions;
 using AiDaBenYing.ViewModels;
 using MaterialDesignThemes.Wpf;
-using RegisterSrv.ClientSDK;
 
 namespace AiDaBenYing.Views;
 
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
-    private static readonly string LogFile = @"d:\CSharpProjects\AiHUD\click_log.txt";
 
     public MainWindow()
     {
@@ -25,17 +24,6 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
     }
 
-    private void Log(string message)
-    {
-        try
-        {
-            var logMessage = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
-            System.IO.File.AppendAllText(LogFile, logMessage + Environment.NewLine);
-            System.Diagnostics.Debug.WriteLine(logMessage);
-        }
-        catch { }
-    }
-
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         await _viewModel.InitializeAsync();
@@ -43,7 +31,6 @@ public partial class MainWindow : Window
 
     private void AllApps_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        Log($"[AllApps_Click] Sender: {sender?.GetType().Name}, Current SelectedCategory: {_viewModel.SelectedCategory?.Name ?? "null"}");
         if (_viewModel.SelectedCategory == null)
         {
             // Already showing all apps, force refresh by temporarily switching
@@ -55,7 +42,6 @@ public partial class MainWindow : Window
         {
             _viewModel.SelectedCategory = null;
         }
-        Log($"[AllApps_Click] After set, SelectedCategory: {_viewModel.SelectedCategory?.Name ?? "null"}");
     }
 
     private void CategoryItem_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -73,13 +59,7 @@ public partial class MainWindow : Window
 
         if (border?.Tag is Category category)
         {
-            Log($"[CategoryItem_Click] Sender: {sender?.GetType().Name}, Category: {category.Name}, Current SelectedCategory: {_viewModel.SelectedCategory?.Name ?? "null"}");
             _viewModel.SelectedCategory = category;
-            Log($"[CategoryItem_Click] After set, SelectedCategory: {_viewModel.SelectedCategory?.Name ?? "null"}");
-        }
-        else
-        {
-            Log($"[CategoryItem_Click] Failed - Sender: {sender?.GetType().Name}");
         }
     }
 
@@ -213,35 +193,48 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ShowSettings_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var dlg = new SettingsDialog { Owner = this };
+            dlg.ShowDialog();
+            // 设置保存后无需重载数据；其它模块（市场下载）会读最新的 SettingsService.Current
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("无法打开系统设置: " + ex.Message, "错误",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private void ShowLicense_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            // 绕开 LicenseManager 直接 new LicenseWindow，以便：
-            //  1) 把本地缓存的 KeyCode 注入进去，窗口打开即显示"已注册"
-            //  2) 弹窗关闭后能拿到 ValidatedLicenseKey 写回本地缓存
             var cachedKey = LicenseCache.Load()?.KeyCode;
-            var serverUrl = System.Configuration.ConfigurationManager.AppSettings["LicenseServerUrl"]
-                            ?? Environment.GetEnvironmentVariable("AIHUD_LICENSE_SERVER")
-                            ?? "http://localhost:5232";
+            var regResult = App.License!.ShowRegistrationWindow(
+                appName: "AI大本营",
+                appVersion: App.AppVersion.ToString(),
+                prefillKey: cachedKey);
 
-            var licenseWindow = new LicenseWindow(App.AppId, "AI大本营", App.AppVersion.ToString(), serverUrl, cachedKey)
+            if (regResult.IsValid && !string.IsNullOrWhiteSpace(regResult.ValidatedLicenseKey))
             {
-                Owner = this
-            };
-            licenseWindow.ShowDialog();
-
-            if (licenseWindow.IsLicenseValid && !string.IsNullOrWhiteSpace(licenseWindow.ValidatedLicenseKey))
-            {
-                LicenseCache.Save(licenseWindow.ValidatedLicenseKey);
+                LicenseCache.Save(regResult.ValidatedLicenseKey);
                 App.IsLicenseValid = true;
-                MessageBox.Show("注册成功，正在重新加载数据…", "AI大本营",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
                 _ = _viewModel.InitializeAsync();
             }
-            else if (licenseWindow.IsLicenseValid)
+            else if (regResult.IsValid)
             {
                 App.IsLicenseValid = true;
+            }
+            else if (!string.IsNullOrEmpty(cachedKey))
+            {
+                MessageBox.Show(
+                    "注册窗口未返回有效注册码。\n\n" +
+                    "如果你是刚刚更换了服务器地址，原缓存的注册码绑定的是旧服务器，\n" +
+                    "请用新服务器的管理员生成的注册码再次验证（也可以直接申请试用）。",
+                    "AI大本营", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
@@ -255,14 +248,10 @@ public partial class MainWindow : Window
     {
         try
         {
-            App.Updater ??= new RegisterSrv.ClientSDK.Services.UpdateClient(
-                baseUrl: System.Configuration.ConfigurationManager.AppSettings["LicenseServerUrl"]
-                         ?? "http://localhost:5232",
-                appId: App.AppId);
-
             var status = "正在检查更新...";
+            _ = status; // 保留以备扩展
             Cursor = System.Windows.Input.Cursors.Wait;
-            var result = await App.Updater.CheckUpdateAsync(App.AppVersion.ToString());
+            var result = await App.Updater!.CheckAsync(App.AppVersion.ToString());
             Cursor = System.Windows.Input.Cursors.Arrow;
 
             if (!result.IsSuccess)
@@ -272,14 +261,14 @@ public partial class MainWindow : Window
                 return;
             }
 
-            if (!result.HasUpdate || result.UpdateInfo == null)
+            if (!result.HasUpdate || result.Info == null)
             {
                 MessageBox.Show("已是最新版本。", "检查更新",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var dlg = new UpdateDialog(result.UpdateInfo, App.AppVersion.ToString())
+            var dlg = new UpdateDialog(result.Info, App.AppVersion.ToString())
             {
                 Owner = this
             };
