@@ -21,6 +21,15 @@
     <Content Include="logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!--
+         App.config 输出配置：
+         .NET SDK 项目 + ConfigurationManager 9.x 包默认输出 AiDaBenYing.dll.config。
+         用 Content + TargetPath 显式重命名为 AiDaBenYing.exe.config（与 AssemblyName 一致）。
+    -->
+    <Content Include="App.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AiDaBenYing.exe.config</Link>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

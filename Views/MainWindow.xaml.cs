@@ -176,11 +176,12 @@ public partial class MainWindow : Window
     {
         try
         {
-            // 每次点击都重新 new 窗口，关闭即销毁。WebView2 持有 GPU/网络资源，
-            // 不适合像普通 ViewModel 那样长期缓存。
-            var win = new AppMarketWindow
+            // 不设 Owner：避免关闭应用市场时强制让主窗口失焦、回到任务栏。
+            // 改在 Closed 事件里手动 Activate() 主窗口 —— 体验上等价于"点回来"。
+            var win = new AppMarketWindow();
+            win.Closed += (_, _) =>
             {
-                Owner = this
+                if (IsLoaded) Activate();
             };
             win.Show();
         }

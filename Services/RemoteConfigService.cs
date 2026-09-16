@@ -27,9 +27,15 @@ public static class RemoteConfigService
     public const string DefaultRemoteConfigUrl =
         "http://www.ujuji.cn/hub/api/config.json";
 
+    /// <summary>
+    /// App.config 里对应的 key。
+    /// </summary>
+    public const string AppConfigKey = "RemoteConfigUrl";
+
     private const string EnvLicenseServer = "AIHUD_LICENSE_SERVER";
     private const string EnvMarketServer   = "AIHUD_MARKET_SERVER";
     private const string EnvConfigApplied  = "AIHUD_REMOTE_CONFIG_APPLIED";
+    private const string EnvRemoteConfigUrl = "AIHUD_REMOTE_CONFIG_URL";
 
     /// <summary>
     /// 当前进程内缓存的最新远程配置（启动后只拉一次）。
@@ -37,9 +43,37 @@ public static class RemoteConfigService
     public static RemoteConfig? Current { get; private set; }
 
     /// <summary>
-    /// 当前生效的远程配置 URL（可在 main 启动前被覆盖用于测试）。
+    /// 远程配置 URL 解析（三层优先级）：
+    ///   1. 环境变量 AIHUD_REMOTE_CONFIG_URL   ← RemoteConfigService 启动前可设
+    ///   2. App.config 的 RemoteConfigUrl
+    ///   3. 兜底默认值 DefaultRemoteConfigUrl
+    ///
+    /// 此属性可在 <see cref="LoadAndApplyAsync"/> 调用前被覆盖（测试场景）。
     /// </summary>
-    public static string RemoteConfigUrl { get; set; } = DefaultRemoteConfigUrl;
+    public static string RemoteConfigUrl => ResolveRemoteConfigUrl();
+
+    private static string ResolveRemoteConfigUrl()
+    {
+        // 1. 环境变量
+        var fromEnv = Environment.GetEnvironmentVariable(EnvRemoteConfigUrl);
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+            return fromEnv.TrimEnd('/');
+
+        // 2. App.config
+        try
+        {
+            var fromConfig = System.Configuration.ConfigurationManager.AppSettings[AppConfigKey];
+            if (!string.IsNullOrWhiteSpace(fromConfig))
+                return fromConfig.TrimEnd('/');
+        }
+        catch
+        {
+            // App.config 缺失时忽略
+        }
+
+        // 3. 兜底
+        return DefaultRemoteConfigUrl;
+    }
 
     private static readonly HttpClient Http = new()
     {
@@ -96,12 +130,16 @@ public static class RemoteConfigService
     /// <summary>
     /// 把 RemoteConfig 的字段写入进程环境变量。
     /// 仅当字段非空时覆盖，保留其它原有变量。
+    ///
+    /// 重要：RemoteConfig.marketServer 也写入 AIHUD_MARKET_SERVER，
+    /// 这样 AppMarketWindow.ResolveMarketUrl() 就能读到远程下发的市场地址。
     /// </summary>
     private static void ApplyToEnvironment(RemoteConfig cfg)
     {
         if (!string.IsNullOrWhiteSpace(cfg.LicenseServer))
             Environment.SetEnvironmentVariable(EnvLicenseServer, cfg.LicenseServer.Trim());
 
+        // 【新增】远程 config.json 中的 marketServer 字段，通过环境变量透传给 AppMarketWindow
         if (!string.IsNullOrWhiteSpace(cfg.MarketServer))
             Environment.SetEnvironmentVariable(EnvMarketServer, cfg.MarketServer.Trim());
 

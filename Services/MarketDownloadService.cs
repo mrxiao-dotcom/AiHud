@@ -49,71 +49,193 @@ public class MarketDownloadService
         MarketDownloadRequest request,
         CancellationToken ct = default)
     {
+        // 诊断日志：记录原始请求
+        Debug.WriteLine($"[MarketDownload] === ENTRY ===");
+        Debug.WriteLine($"[MarketDownload] AppName   = '{request?.AppName}'");
+        Debug.WriteLine($"[MarketDownload] URL       = '{request?.DownloadUrl}'");
+        Debug.WriteLine($"[MarketDownload] Referer   = '{request?.RefererUrl}'");
+        Debug.WriteLine($"[MarketDownload] Desc      = '{request?.Description}'");
         try
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.DownloadUrl))
                 return MarketInstallResult.Fail("下载链接为空");
 
+            var normalizedUrl = SettingsService.NormalizeSourceUrl(request.DownloadUrl);
+            Debug.WriteLine($"[MarketDownload] normalizedUrl = '{normalizedUrl}'");
+
+            // SHA256 在下载完成后计算；先占位，避免作用域问题（缓存命中分支需要）
+            string pkgSha256 = "";
+
             // 1. 在安装根目录下分配子目录
-            var installDir = SettingsService.ResolveAppInstallDir(request.AppName);
+            var installDir = SettingsService.ResolveAppInstallDir(request.AppName, request.AppName);
+            Debug.WriteLine($"[MarketDownload] installDir = '{installDir}'");
             Report(5, $"已分配目录: {installDir}");
 
-            // 2. 下载
-            string pkgPath = Path.Combine(installDir, "package.bin");
-            if (!await DownloadToFileAsync(request.DownloadUrl, pkgPath, request.RefererUrl, ct))
-            {
-                return MarketInstallResult.Fail("下载失败：详情见日志");
-            }
-            Report(40, "下载完成");
-
-            // 3. 校验文件格式（ZIP 或 RAR5）
-            if (!LooksLikeZipOrRar(pkgPath, out var preview, out var fmt))
-            {
-                try { File.Delete(pkgPath); } catch { }
-                return MarketInstallResult.Fail($"下载的文件不是有效的 ZIP/RAR 压缩包，前 4KB 内容:\n{preview}");
-            }
-            Report(42, $"识别为 {fmt} 格式");
-
-            // 4. 解压
-            string extractDir = Path.Combine(installDir, "app");
-            if (Directory.Exists(extractDir))
-            {
-                Directory.Delete(extractDir, recursive: true);
-            }
-            Directory.CreateDirectory(extractDir);
-
+            // 2. 下载到系统临时目录，避免后续清理 installDir 时误删压缩包
+            string pkgPath = Path.Combine(
+                Path.GetTempPath(),
+                $"aihud_pkg_{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}.bin");
             try
             {
-                using var archive = ArchiveFactory.OpenArchive(pkgPath);
-                foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
+                if (!await DownloadToFileAsync(request.DownloadUrl, pkgPath, request.RefererUrl, ct))
                 {
-                    entry.WriteToDirectory(extractDir, new ExtractionOptions
+                    try { File.Delete(pkgPath); } catch { }
+                    return MarketInstallResult.Fail("下载失败：详情见日志");
+                }
+                Report(40, "下载完成");
+
+                // 2.5 算 SHA256，用于"重复下载同包"快速跳过
+                try
+                {
+                    pkgSha256 = await ComputeFileSha256Async(pkgPath, ct);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[MarketDownload] SHA256 计算失败: {ex.Message}");
+                    pkgSha256 = "";
+                }
+                Debug.WriteLine($"[MarketDownload] package SHA256 = '{pkgSha256}'");
+
+                // 2.6 命中缓存：URL 相同 + SHA256 相同 + 旧 install 还在 → 完全跳过解压
+                if (!string.IsNullOrEmpty(pkgSha256))
+                {
+                    var existingMarker = SettingsService.TryReadInstallMarker(installDir);
+                    if (existingMarker != null
+                        && existingMarker.IsValid
+                        && string.Equals(existingMarker.SourceUrl, normalizedUrl, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(existingMarker.PackageSha256, pkgSha256, StringComparison.OrdinalIgnoreCase)
+                        && !string.IsNullOrEmpty(existingMarker.MainExePath)
+                        && File.Exists(existingMarker.MainExePath))
                     {
-                        ExtractFullPath = true,
-                        Overwrite = true
-                    });
+                        Debug.WriteLine($"[MarketDownload] CACHE HIT, skipping extraction.");
+                        Report(80, "检测到相同包，跳过解压直接复用");
+
+                        var cachedItem = new AppItem(
+                            string.IsNullOrWhiteSpace(existingMarker.DisplayName) ? request.AppName : existingMarker.DisplayName,
+                            existingMarker.MainExePath)
+                        {
+                            Description = request.Description ?? existingMarker.AppName ?? "",
+                            Arguments = string.Empty
+                        };
+                        _ = Task.Run(() => cachedItem.EnsureIconLoaded());
+
+                        try { File.Delete(pkgPath); } catch { }
+                        Report(100, "完成（命中缓存）");
+                        return MarketInstallResult.Ok(cachedItem, installDir);
+                    }
+                }
+
+                // 3. 校验文件格式（ZIP 或 RAR5）
+                if (!LooksLikeZipOrRar(pkgPath, out var preview, out var fmt))
+                {
+                    try { File.Delete(pkgPath); } catch { }
+                    return MarketInstallResult.Fail($"下载的文件不是有效的 ZIP/RAR 压缩包，前 4KB 内容:\n{preview}");
+                }
+                Report(42, $"识别为 {fmt} 格式");
+
+                // 4. 解压：直接放到 installDir，不额外包 app/ 子目录。
+                //    注意：解压前清理 installDir 内容（不包括上级目录）。
+                if (Directory.Exists(installDir))
+                {
+                    foreach (var sub in Directory.GetDirectories(installDir))
+                        Directory.Delete(sub, recursive: true);
+                    foreach (var f in Directory.GetFiles(installDir, "*", SearchOption.AllDirectories))
+                        try { File.Delete(f); } catch { }
+                }
+                Directory.CreateDirectory(installDir);
+
+                try
+                {
+                    using var archive = ArchiveFactory.OpenArchive(pkgPath);
+
+                    // 收集所有文件路径，算出公共顶级目录前缀
+                    var allPaths = archive.Entries
+                        .Where(e => !e.IsDirectory && e.Key != null)
+                        .Select(e => e.Key!.Replace('\\', '/'))
+                        .ToList();
+
+                    // 诊断日志：打印所有 entry
+                    Debug.WriteLine($"[MarketDownload] === ARCHIVE ENTRIES ({allPaths.Count}) ===");
+                    foreach (var p in allPaths.Take(50))
+                        Debug.WriteLine($"[MarketDownload]   entry: {p}");
+                    if (allPaths.Count > 50)
+                        Debug.WriteLine($"[MarketDownload]   ... and {allPaths.Count - 50} more");
+
+                    if (allPaths.Count == 0)
+                        return MarketInstallResult.Fail("压缩包为空，未找到任何文件。");
+
+                    // 如果所有文件都共享同一个顶级目录（如 public/app.exe），
+                    // 把这个顶级目录拍平：去掉公共前缀，让 exe 直接出现在 installDir 下。
+                    var commonPrefix = allPaths
+                        .Aggregate((string?)null, (acc, p) => GetCommonDir(acc, p));
+                    Debug.WriteLine($"[MarketDownload] commonPrefix = '{commonPrefix ?? "(null)"}'");
+
+                    // 解压到 installDir
+                    foreach (var entry in archive.Entries.Where(e => !e.IsDirectory))
+                    {
+                        var rawPath = entry.Key?.Replace('\\', '/') ?? "";
+
+                        if (!string.IsNullOrEmpty(commonPrefix)
+                            && rawPath.StartsWith(commonPrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            rawPath = rawPath.Substring(commonPrefix.Length).TrimStart('/');
+                        }
+
+                        var dest = Path.Combine(installDir, rawPath);
+                        Directory.CreateDirectory(Path.GetDirectoryName(dest) ?? "");
+
+                        var tmpDest = Path.Combine(installDir, Path.GetFileName(rawPath));
+                        entry.WriteToDirectory(installDir, new ExtractionOptions
+                        {
+                            ExtractFullPath = false,
+                            Overwrite = true
+                        });
+
+                        if (!string.Equals(tmpDest, dest, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (File.Exists(dest)) File.Delete(dest);
+                            if (File.Exists(tmpDest)) File.Move(tmpDest, dest);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return MarketInstallResult.Fail($"解压失败（文件可能被截断或已损坏）: {ex.Message}");
+                }
+                finally
+                {
+                    try { File.Delete(pkgPath); } catch { }
                 }
             }
             catch (Exception ex)
             {
-                return MarketInstallResult.Fail($"解压失败（文件可能被截断或已损坏）: {ex.Message}");
+                try { File.Delete(pkgPath); } catch { }
+                return MarketInstallResult.Fail("下载/安装过程异常: " + ex.Message);
             }
 
-            try { File.Delete(pkgPath); } catch { }
             Report(75, "解压完成，正在识别主程序…");
 
-            // 5. 找主 EXE
-            var mainExe = FindMainExecutable(extractDir);
+            // 5. 找主 EXE（直接在 installDir 下找，不用再进 app/ 子目录）
+            var mainExe = FindMainExecutable(installDir);
             if (mainExe == null)
             {
                 return MarketInstallResult.Fail("解压完成，但目录里没有找到任何 .exe 主程序。请检查包结构。");
             }
             Report(95, $"主程序: {Path.GetFileName(mainExe)}");
 
-            // 6. 尝试从 EXE 版本信息中提取真实产品名（覆盖 request.AppName）
-            var resolvedName = ResolveExeDisplayName(mainExe, request.AppName);
-            Report(97, "正在注册…");
+            // 6. 决定显示名称（优先用压缩包名，即 request.AppName）。
+            //
+            // 关键约定：上传到应用市场的压缩包名 = 用户在 AiHUD 里看到的应用名。
+            // 例如 批量生图.rar → 显示为 "批量生图"，而不是 exe 内部挖出来的英文名。
+            //
+            // 但如果压缩包名恰好是 exe 的脏名（UUID / 全是版本号），允许回退到
+            // exe 文件版本信息中的 ProductName / InternalName。
+            //
+            // 调用约定：request.AppName 必须是"用户期望看到的名字"，绝对不能再去
+            // exe 里找一个英文名把它盖掉。
+            var resolvedName = ResolveDisplayName(request.AppName, mainExe);
+            Report(97, $"显示名称: {resolvedName}");
 
             // 7. 构造 AppItem
             var item = new AppItem(resolvedName, mainExe)
@@ -123,6 +245,19 @@ public class MarketDownloadService
             };
             // 图标异步加载，调用方在主线程后续会刷新
             _ = Task.Run(() => item.EnsureIconLoaded());
+
+            // 8. 写 install marker：让该目录被识别为"该应用的合法安装"，
+            //    下次同名应用下载时，能正确进入"升级"分支而不是"撞名"。
+            //    install marker 里要保留"显示名 + exe 名 + 源 URL + 包哈希"，
+            //    后面做"已安装版本列表"和"重复下载检测"都能直接用。
+            SettingsService.WriteInstallMarker(
+                installDir: installDir,
+                displayName: resolvedName,
+                appName: request.AppName,
+                version: request.AppName, // 这里先用 appName 当 hint，UI 可以读 exe 的版本信息
+                mainExePath: mainExe,
+                sourceUrl: normalizedUrl,
+                packageSha256: pkgSha256);
 
             Report(100, "安装完成");
             return MarketInstallResult.Ok(item, installDir);
@@ -171,7 +306,6 @@ public class MarketDownloadService
                 downloaded += read;
                 if (total > 0)
                 {
-                    // 5%~35% 区间映射到下载进度
                     var pct = (int)(5 + (downloaded * 30.0 / total));
                     if ((DateTime.UtcNow - lastReport).TotalMilliseconds > 200)
                     {
@@ -180,6 +314,8 @@ public class MarketDownloadService
                     }
                 }
             }
+            // 同步落盘，下面的 SHA256 计算必须读到完整文件
+            await dst.FlushAsync(ct);
             return true;
         }
         catch (Exception ex)
@@ -187,6 +323,17 @@ public class MarketDownloadService
             Debug.WriteLine($"[MarketDownload] 下载异常: {ex.Message}");
             return false;
         }
+    }
+
+    /// <summary>
+    /// 计算文件的 SHA256（小写 hex）。读大文件足够快：604KB 约几毫秒，几 MB 几十毫秒。
+    /// </summary>
+    private static async Task<string> ComputeFileSha256Async(string filePath, CancellationToken ct)
+    {
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        await using var fs = File.OpenRead(filePath);
+        var hash = await sha.ComputeHashAsync(fs, ct);
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
     /// <summary>
@@ -281,40 +428,47 @@ public class MarketDownloadService
     }
 
     /// <summary>
-    /// 从 EXE 文件的版本信息中提取真实产品名/内部名作为显示名称。
-    /// 如果无法提取有效名称或名称为 UUID 格式，则使用 fallback。
+    /// 决定要显示给用户的应用名。
+    /// 优先级：
+    ///   1. <paramref name="archiveDisplayName"/>（压缩包名 = 卖家上传时人工起的中文名）
+    ///      —— 若它是有效名（非空、非 UUID、非纯数字），就直接用它，**不再用 exe 名字覆盖**。
+    ///   2. 兜底：当压缩包名无效（UUID / 全是版本号），从 exe 版本信息里读 InternalName/ProductName。
+    ///   3. 终极兜底：用 exe 文件名去掉扩展名。
     /// </summary>
-    private static string ResolveExeDisplayName(string exePath, string fallback)
+    /// <remarks>
+    /// 为什么不让 exe 版本信息覆盖压缩包名：
+    ///   exe 内部写的 InternalName/ProductName 通常是英文（开发者语言），
+    ///   但卖家在市场上传时给的中文名是给最终用户看的，UI 上必须用中文名。
+    ///   例：批量生图.rar 解出 BatchImageGen.exe，
+    ///      exe 内部 ProductName=BatchImageGen（英文），
+    ///      我们最终显示 "批量生图"，而不是 "BatchImageGen"。
+    /// </remarks>
+    private static string ResolveDisplayName(string archiveDisplayName, string exePath)
     {
+        // 1. 压缩包名有效就直接用
+        if (IsGoodDisplayName(archiveDisplayName))
+            return archiveDisplayName.Trim();
+
+        // 2. 兜底：读 exe 版本信息
         try
         {
             var ver = FileVersionInfo.GetVersionInfo(exePath);
-
-            // 优先取 InternalName（通常最干净），其次 ProductName，再其次 FileVersion
-            var candidates = new[]
+            foreach (var c in new[] { ver.InternalName, ver.ProductName, ver.FileVersion })
             {
-                ver.InternalName,
-                ver.ProductName,
-                ver.FileVersion,
-            };
-
-            foreach (var c in candidates)
-            {
-                if (!string.IsNullOrWhiteSpace(c))
+                if (!string.IsNullOrWhiteSpace(c) && IsGoodDisplayName(c))
                 {
+                    // 注意：exe 版本信息可能带 ".exe" 扩展名（极少见），剥掉
                     var name = Path.GetFileNameWithoutExtension(c);
                     if (IsGoodDisplayName(name))
                         return name;
                 }
             }
         }
-        catch { }
+        catch { /* 继续兜底 */ }
 
-        // fallback 本身是 UUID 格式时返回"下载的应用"
-        if (!IsGoodDisplayName(fallback))
-            return "下载的应用";
-
-        return fallback;
+        // 3. 用 exe 文件名（去扩展名）
+        var fallback = Path.GetFileNameWithoutExtension(exePath);
+        return IsGoodDisplayName(fallback) ? fallback : "未命名应用";
     }
 
     private static bool IsGoodDisplayName(string name)
@@ -346,6 +500,30 @@ public class MarketDownloadService
             size /= 1024;
         }
         return $"{size:0.##} {sizes[order]}";
+    }
+
+    /// <summary>
+    /// 计算两个路径的公共目录前缀。
+    /// null 表示"第一个路径尚未确定"。
+    /// </summary>
+    private static string? GetCommonDir(string? acc, string? next)
+    {
+        if (string.IsNullOrEmpty(acc)) return next;
+        if (string.IsNullOrEmpty(next)) return acc;
+
+        var accParts = acc.Split('/');
+        var nextParts = next.Split('/');
+        var minLen = Math.Min(accParts.Length, nextParts.Length);
+
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; i < minLen; i++)
+        {
+            if (string.Equals(accParts[i], nextParts[i], StringComparison.OrdinalIgnoreCase))
+                sb.Append(accParts[i]).Append('/');
+            else
+                break;
+        }
+        return sb.Length > 0 ? sb.ToString() : null;
     }
 }
 
