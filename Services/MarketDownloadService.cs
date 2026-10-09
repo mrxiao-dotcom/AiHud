@@ -72,6 +72,19 @@ public class MarketDownloadService
             Debug.WriteLine($"[MarketDownload] installDir = '{installDir}'");
             Report(5, $"已分配目录: {installDir}");
 
+            // 检测是否为升级场景：已存在 marker 且来源 URL 匹配
+            bool isUpgrade = false;
+            var existingMarker = SettingsService.TryReadInstallMarker(installDir);
+            if (existingMarker != null && existingMarker.IsValid)
+            {
+                var normalizedUrlForCompare = SettingsService.NormalizeSourceUrl(request.DownloadUrl);
+                if (string.Equals(existingMarker.SourceUrl, normalizedUrlForCompare, StringComparison.OrdinalIgnoreCase))
+                {
+                    isUpgrade = true;
+                    Debug.WriteLine($"[MarketDownload] UPGRADE scenario detected for '{request.AppName}'");
+                }
+            }
+
             // 2. 下载到系统临时目录，避免后续清理 installDir 时误删压缩包
             string pkgPath = Path.Combine(
                 Path.GetTempPath(),
@@ -100,10 +113,10 @@ public class MarketDownloadService
                 // 2.6 命中缓存：URL 相同 + SHA256 相同 + 旧 install 还在 → 完全跳过解压
                 if (!string.IsNullOrEmpty(pkgSha256))
                 {
-                    var existingMarker = SettingsService.TryReadInstallMarker(installDir);
+                    var normUrl = SettingsService.NormalizeSourceUrl(request.DownloadUrl);
                     if (existingMarker != null
                         && existingMarker.IsValid
-                        && string.Equals(existingMarker.SourceUrl, normalizedUrl, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(existingMarker.SourceUrl, normUrl, StringComparison.OrdinalIgnoreCase)
                         && string.Equals(existingMarker.PackageSha256, pkgSha256, StringComparison.OrdinalIgnoreCase)
                         && !string.IsNullOrEmpty(existingMarker.MainExePath)
                         && File.Exists(existingMarker.MainExePath))
@@ -118,11 +131,12 @@ public class MarketDownloadService
                             Description = request.Description ?? existingMarker.AppName ?? "",
                             Arguments = string.Empty
                         };
-                        _ = Task.Run(() => cachedItem.EnsureIconLoaded());
+                        // 缓存命中不重新加载图标，保持原有图标
+                        // 图标已在首次加载时缓存到文件
 
                         try { File.Delete(pkgPath); } catch { }
                         Report(100, "完成（命中缓存）");
-                        return MarketInstallResult.Ok(cachedItem, installDir);
+                        return MarketInstallResult.Ok(cachedItem, installDir, isUpgrade: true);
                     }
                 }
 
@@ -135,15 +149,20 @@ public class MarketDownloadService
                 Report(42, $"识别为 {fmt} 格式");
 
                 // 4. 解压：直接放到 installDir，不额外包 app/ 子目录。
-                //    注意：解压前清理 installDir 内容（不包括上级目录）。
+                //    升级场景：只清理旧文件，保留 install.json 以便更新 marker
                 if (Directory.Exists(installDir))
                 {
                     foreach (var sub in Directory.GetDirectories(installDir))
                         Directory.Delete(sub, recursive: true);
-                    foreach (var f in Directory.GetFiles(installDir, "*", SearchOption.AllDirectories))
-                        try { File.Delete(f); } catch { }
+                    foreach (var f in Directory.GetFiles(installDir))
+                        // 保留 install.json，只更新其内容
+                        if (!f.EndsWith("install.json", StringComparison.OrdinalIgnoreCase))
+                            try { File.Delete(f); } catch { }
                 }
-                Directory.CreateDirectory(installDir);
+                else
+                {
+                    Directory.CreateDirectory(installDir);
+                }
 
                 try
                 {
@@ -243,8 +262,11 @@ public class MarketDownloadService
                 Description = request.Description ?? string.Empty,
                 Arguments = string.Empty
             };
-            // 图标异步加载，调用方在主线程后续会刷新
-            _ = Task.Run(() => item.EnsureIconLoaded());
+            // 新下载场景：异步加载图标；升级场景：跳过，保持原有图标
+            if (!isUpgrade)
+            {
+                _ = Task.Run(() => item.EnsureIconLoaded());
+            }
 
             // 8. 写 install marker：让该目录被识别为"该应用的合法安装"，
             //    下次同名应用下载时，能正确进入"升级"分支而不是"撞名"。
@@ -542,8 +564,13 @@ public class MarketInstallResult
     public AppItem? AppItem { get; private set; }
     public string? InstallDir { get; private set; }
 
-    public static MarketInstallResult Ok(AppItem item, string installDir) =>
-        new() { IsSuccess = true, Message = "安装成功", AppItem = item, InstallDir = installDir };
+    /// <summary>
+    /// 标识是否为升级场景（true）或新下载场景（false）。
+    /// </summary>
+    public bool IsUpgrade { get; private set; }
+
+    public static MarketInstallResult Ok(AppItem item, string installDir, bool isUpgrade = false) =>
+        new() { IsSuccess = true, Message = "安装成功", AppItem = item, InstallDir = installDir, IsUpgrade = isUpgrade };
 
     public static MarketInstallResult Fail(string message) =>
         new() { IsSuccess = false, Message = message };

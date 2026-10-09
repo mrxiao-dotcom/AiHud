@@ -152,36 +152,8 @@ public static class SettingsService
 
         if (sameApp)
         {
-            // 升级场景：把旧目录里的内容打包成 v{n+1}/ 子目录，再在新位置解压
-            var existingExe = marker!.MainExePath;
-            var nextVersion = ResolveNextVersionString(marker.Version);
-            var versionedDir = Path.Combine(root, safe, safe + "_" + nextVersion);
-
-            // 万一 _v2 也存在（极少见，比如手动复制），追加时间戳兜底
-            if (Directory.Exists(versionedDir))
-            {
-                versionedDir = Path.Combine(root, safe,
-                    safe + "_" + nextVersion + "_" + DateTime.Now.ToString("HHmmssfff"));
-            }
-
-            try
-            {
-                Directory.CreateDirectory(versionedDir);
-            }
-            catch
-            {
-                // 极端情况（只读盘 / 权限不足）→ 退到时间戳目录
-                versionedDir = Path.Combine(root,
-                    safe + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff"));
-                Directory.CreateDirectory(versionedDir);
-            }
-
-            // 归档旧版本：把旧文件列表记到 versionedDir\install.json 里，
-            // 不实际移动旧 exe（防止用户正在用 / 升级未完成），仅记录引用
-            // 调用方在新版安装成功后，可选择清理旧版（删除上一版的子目录）
-            WriteVersionArchiveMeta(versionedDir, marker);
-
-            return versionedDir;
+            // 升级场景：直接返回主目录，由下载服务覆盖内容（不生成 v2 子目录）
+            return primaryDir;
         }
 
         // 3) 撞名（不同 appName 清洗后相同）→ 直接用时间戳目录

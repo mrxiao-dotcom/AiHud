@@ -609,34 +609,76 @@ public partial class AppMarketWindow : Window
                 return;
             }
 
-            // 自动添加到"最新下载"分类
-            var category = GetOrCreateLatestDownloadCategory();
-            category.AppItems.Add(result.AppItem);
-            Log($"Added app '{result.AppItem.Name}' to category '{category.Name}'. AppItems.Count={category.AppItems.Count}");
-            await SaveDataAsync();
-
-            // ★ 主动把主窗口切到"最新下载"分类，让用户立刻能看到
-            try
+            // 根据是否为升级场景，决定是否添加到"最新下载"分类
+            if (result.IsUpgrade)
             {
-                var mainVm = TryGetMainViewModel();
-                if (mainVm != null && mainVm.SelectedCategory != category)
+                // 升级场景：更新现有 AppItem（如果存在），不添加到最新下载
+                Log($"Upgraded app '{result.AppItem.Name}' in place");
+
+                // 尝试更新主窗口中该应用的信息
+                try
                 {
-                    mainVm.SelectedCategory = category;
-                    Log($"Switched SelectedCategory to '{category.Name}'");
+                    var mainVm = TryGetMainViewModel();
+                    if (mainVm != null)
+                    {
+                        // 在所有分类中查找同名应用并更新其 exe 路径
+                        foreach (var cat in mainVm.Categories)
+                        {
+                            var existingItem = cat.AppItems.FirstOrDefault(
+                                a => string.Equals(a.Name, result.AppItem?.Name, StringComparison.OrdinalIgnoreCase));
+                            if (existingItem != null)
+                            {
+                                // 更新 exe 路径（虽然路径相同，但确保 marker 正确）
+                                existingItem.ExecutablePath = result.AppItem!.ExecutablePath;
+                                Log($"Updated existing app '{existingItem.Name}' executable path");
+                                break;
+                            }
+                        }
+                        await mainVm.SaveDataAsync();
+                    }
                 }
-            }
-            catch (Exception selEx)
-            {
-                Log("Set SelectedCategory failed (non-fatal): " + selEx.Message);
-            }
+                catch (Exception updateEx)
+                {
+                    Log("Update existing app failed (non-fatal): " + updateEx.Message);
+                }
 
-            Log($"Install ok: {result.AppItem.ExecutablePath} -> {category.Name}");
-            MessageBox.Show(
-                $"应用 \"{result.AppItem.Name}\" 已下载并自动安装到 {result.InstallDir}\n" +
-                $"已添加到分类 \"{category.Name}\"（可在左侧查看）。",
-                "应用市场",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                MessageBox.Show(
+                    $"应用 \"{result.AppItem.Name}\" 已更新到新版本。",
+                    "应用市场",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                // 新下载场景：自动添加到"最新下载"分类
+                var category = GetOrCreateLatestDownloadCategory();
+                category.AppItems.Add(result.AppItem);
+                Log($"Added app '{result.AppItem.Name}' to category '{category.Name}'. AppItems.Count={category.AppItems.Count}");
+                await SaveDataAsync();
+
+                // 主动把主窗口切到"最新下载"分类，让用户立刻能看到
+                try
+                {
+                    var mainVm = TryGetMainViewModel();
+                    if (mainVm != null && mainVm.SelectedCategory != category)
+                    {
+                        mainVm.SelectedCategory = category;
+                        Log($"Switched SelectedCategory to '{category.Name}'");
+                    }
+                }
+                catch (Exception selEx)
+                {
+                    Log("Set SelectedCategory failed (non-fatal): " + selEx.Message);
+                }
+
+                Log($"Install ok: {result.AppItem.ExecutablePath} -> {category.Name}");
+                MessageBox.Show(
+                    $"应用 \"{result.AppItem.Name}\" 已下载并自动安装到 {result.InstallDir}\n" +
+                    $"已添加到分类 \"{category.Name}\"（可在左侧查看）。",
+                    "应用市场",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
         }
         catch (Exception ex)
         {
