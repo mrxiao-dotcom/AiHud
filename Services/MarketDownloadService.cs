@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using static System.Diagnostics.FileVersionInfo;
 using AiDaBenYing.Models;
 using SharpCompress.Archives;
@@ -72,7 +73,12 @@ public class MarketDownloadService
             Debug.WriteLine($"[MarketDownload] installDir = '{installDir}'");
             Report(5, $"已分配目录: {installDir}");
 
-            // 检测是否为升级场景：已存在 marker 且来源 URL 匹配
+            // 检测是否为升级场景。判定顺序（任一命中即视为升级）：
+            //   ① 该 installDir 下已有 marker，且 marker.SourceUrl 与本次 URL 归一化后相等；
+            //   ② 该 installDir 下已有 marker，且 marker.DisplayName / marker.AppName
+            //      与本次 request.AppName "撞名"（覆盖了用户换了压缩包名但仍是同一个应用的场景）。
+            // 关键意义：避免把"同一个应用"误判为新下载，
+            // 进而被错误地新增到"最新下载"分类、产生重复图标。
             bool isUpgrade = false;
             var existingMarker = SettingsService.TryReadInstallMarker(installDir);
             if (existingMarker != null && existingMarker.IsValid)
@@ -81,7 +87,12 @@ public class MarketDownloadService
                 if (string.Equals(existingMarker.SourceUrl, normalizedUrlForCompare, StringComparison.OrdinalIgnoreCase))
                 {
                     isUpgrade = true;
-                    Debug.WriteLine($"[MarketDownload] UPGRADE scenario detected for '{request.AppName}'");
+                    Debug.WriteLine($"[MarketDownload] UPGRADE scenario detected for '{request.AppName}' (URL match)");
+                }
+                else if (SettingsService.NamesMatch(existingMarker, request.AppName))
+                {
+                    isUpgrade = true;
+                    Debug.WriteLine($"[MarketDownload] UPGRADE scenario detected for '{request.AppName}' (name match, DisplayName='{existingMarker.DisplayName}', AppName='{existingMarker.AppName}')");
                 }
             }
 
@@ -262,10 +273,32 @@ public class MarketDownloadService
                 Description = request.Description ?? string.Empty,
                 Arguments = string.Empty
             };
-            // 新下载场景：异步加载图标；升级场景：跳过，保持原有图标
-            if (!isUpgrade)
+
+            // 关键：同步从 exe 提取图标，保存为本地 png，写入 IconPath。
+            //   - 之前是 Task.Run 后台异步提取，结果常常因跨线程 / GDI+ 失败导致
+            //     AppItem.Icon 一直是 null，主界面显示首字母蓝圆块（"默认图标"）。
+            //   - 重启后也无从恢复（IconPath 是 null，DataService 不会自动重新提取）。
+            //   - 同步提取 + 落盘为 png 后，IconPath 被持久化到 JSON，
+            //     下次启动 / 升级 / 重命名都能直接复用。
+            // 升级场景下，如果 installDir 里已经有上次保存的 icon.png（用户手动设的另说），
+            // 也要保留；只有 installDir 里没有时才重新提取。
+            string? savedIconPath = TryPreserveExistingIcon(installDir);
+            if (savedIconPath == null)
             {
-                _ = Task.Run(() => item.EnsureIconLoaded());
+                savedIconPath = ExtractAndSaveIcon(mainExe, installDir);
+            }
+            if (!string.IsNullOrEmpty(savedIconPath))
+            {
+                item.IconPath = savedIconPath;
+                item.SetIcon(IconExtractor.LoadIconFile(savedIconPath));
+                Debug.WriteLine($"[MarketDownload] 图标已保存: {savedIconPath}, Icon!=null={item.Icon != null}");
+            }
+            else
+            {
+                // 实在拿不到，也同步调一次 LoadIcon（不再 Task.Run，避免跨线程）
+                // 这样主界面至少在主线程上看到 Icon 状态变化。
+                item.EnsureIconLoaded();
+                Debug.WriteLine($"[MarketDownload] 未能保存图标，LoadIcon 结果: Icon!=null={item.Icon != null}");
             }
 
             // 8. 写 install marker：让该目录被识别为"该应用的合法安装"，
@@ -522,6 +555,62 @@ public class MarketDownloadService
             size /= 1024;
         }
         return $"{size:0.##} {sizes[order]}";
+    }
+
+    /// <summary>
+    /// 如果安装目录里已经有 icon.png，优先复用（保留用户手动换过的图标）。
+    /// 返回本地文件绝对路径；不存在则返回 null。
+    /// </summary>
+    private static string? TryPreserveExistingIcon(string installDir)
+    {
+        try
+        {
+            var existing = Path.Combine(installDir, "icon.png");
+            if (File.Exists(existing))
+            {
+                Debug.WriteLine($"[MarketDownload] 发现已有 icon.png，保留: {existing}");
+                return existing;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[MarketDownload] 检查 icon.png 异常: {ex.Message}");
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 从 exe 同步提取图标，保存为 installDir/icon.png，返回绝对路径。
+    /// 任何一步失败都返回 null，调用方降级到 EnsureIconLoaded。
+    /// </summary>
+    private static string? ExtractAndSaveIcon(string exePath, string installDir)
+    {
+        try
+        {
+            var bmp = IconExtractor.ExtractIconFromFile(exePath);
+            if (bmp == null)
+            {
+                Debug.WriteLine($"[MarketDownload] ExtractIconFromFile 拿不到图标: {exePath}");
+                return null;
+            }
+
+            var iconPath = Path.Combine(installDir, "icon.png");
+
+            // 用 PngBitmapEncoder 落盘（更稳，比 ToBitmap → Save 少一次 GDI+ 转换）
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmp));
+            using (var fs = new FileStream(iconPath, FileMode.Create, FileAccess.Write))
+            {
+                encoder.Save(fs);
+            }
+            Debug.WriteLine($"[MarketDownload] 图标已保存: {iconPath}");
+            return iconPath;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[MarketDownload] 保存图标异常: {ex.Message}");
+            return null;
+        }
     }
 
     /// <summary>

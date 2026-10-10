@@ -259,7 +259,7 @@ public static class SettingsService
     /// 比较两个名字是否"同一个应用"。
     /// 优先按 DisplayName 比较（旧版本可能没有 DisplayName，回退到 AppName）。
     /// </summary>
-    private static bool NamesMatch(InstallMarker marker, string appName)
+    public static bool NamesMatch(InstallMarker marker, string appName)
     {
         var candidates = new[]
         {

@@ -14,6 +14,31 @@ public static class IconExtractor
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool DestroyIcon(IntPtr hIcon);
 
+    /// <summary>
+    /// 从 exe/dll 中提取指定数量/尺寸的图标。比 GDI+ 的 Icon.ExtractAssociatedIcon 强很多：
+    ///   - 能拿到 PE 资源里所有的 IconGroup 条目（不是只拿第 0 个）
+    ///   - 能指定宽高，从 IconGroup 多个分辨率里选最匹配的那个
+    ///   - 不会被 GDI+ 的旧缓存污染
+    /// </summary>
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int PrivateExtractIconsW(
+        string lpszFile,
+        int nIconIndex,
+        int cxIcon,
+        int cyIcon,
+        IntPtr[] phicon,
+        int[] piconid,
+        int nIcons,
+        int flags);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int ExtractIconExW(
+        string lpszFile,
+        int nIconIndex,
+        IntPtr[] phiconLarge,
+        IntPtr[] phiconSmall,
+        int nIcons);
+
     public static BitmapImage? ExtractIcon(string exePath)
     {
         try
@@ -84,30 +109,132 @@ public static class IconExtractor
 
     public static BitmapImage? ExtractIconFromFile(string filePath)
     {
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+        {
+            DebugLog($"[IconExtractor.ExtractIconFromFile] 文件不存在: {filePath}");
+            return null;
+        }
+
+        DebugLog($"[IconExtractor.ExtractIconFromFile] 开始: {filePath}");
+
+        // 4 级 fallback，确保从 exe/dll 拿到"完整样式图标"：
+        //   ① PrivateExtractIconsW 32x32 + 48x48 + 256x256（按高 DPI 优先取大尺寸）—— 最稳，能穿透 PE 资源拿到所有 IconGroup
+        //   ② ExtractIconExW 拿 0 号 IconGroup 的 large+small —— 比 GDI+ 准
+        //   ③ shell32 ExtractIcon 拿 0 号
+        //   ④ GDI+ Icon.ExtractAssociatedIcon —— 最后兜底
+        //
+        // 之前只有 ④，对很多 .NET / 现代 Win32 exe 拿到的是 GDI+ 缓存的空白或默认图标，
+        // 导致应用市场下载的应用在主界面显示"系统默认"的样式（首字母蓝圆块）。
+        foreach (int size in new[] { 256, 48, 32, 16 })
+        {
+            try
+            {
+                var phicon = new IntPtr[1];
+                var pids   = new int[1];
+                int n = PrivateExtractIconsW(filePath, 0, size, size, phicon, pids, 1, 0);
+                if (n > 0 && phicon[0] != IntPtr.Zero)
+                {
+                    try
+                    {
+                        using var icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(phicon[0]).Clone();
+                        var bmp = IconToBitmapImage(icon);
+                        if (bmp != null)
+                        {
+                            DebugLog($"[IconExtractor.ExtractIconFromFile] PrivateExtractIconsW {size}x{size} 成功");
+                            return bmp;
+                        }
+                    }
+                    finally
+                    {
+                        DestroyIcon(phicon[0]);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog($"[IconExtractor.ExtractIconFromFile] PrivateExtractIconsW {size} 异常: {ex.Message}");
+            }
+        }
+
+        // ② ExtractIconExW
         try
         {
-            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            var large = new IntPtr[1];
+            var small = new IntPtr[1];
+            int n = ExtractIconExW(filePath, 0, large, small, 1);
+            if (n > 0 && (large[0] != IntPtr.Zero || small[0] != IntPtr.Zero))
             {
-                DebugLog($"[IconExtractor.ExtractIconFromFile] 文件不存在: {filePath}");
-                return null;
+                var h = large[0] != IntPtr.Zero ? large[0] : small[0];
+                try
+                {
+                    using var icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(h).Clone();
+                    var bmp = IconToBitmapImage(icon);
+                    if (bmp != null)
+                    {
+                        DebugLog("[IconExtractor.ExtractIconFromFile] ExtractIconExW 成功");
+                        if (large[0] != IntPtr.Zero) DestroyIcon(large[0]);
+                        if (small[0] != IntPtr.Zero) DestroyIcon(small[0]);
+                        return bmp;
+                    }
+                }
+                finally
+                {
+                    if (large[0] != IntPtr.Zero) DestroyIcon(large[0]);
+                    if (small[0] != IntPtr.Zero) DestroyIcon(small[0]);
+                }
             }
-
-            DebugLog($"[IconExtractor.ExtractIconFromFile] 开始: {filePath}");
-
-            var icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
-            if (icon == null)
-            {
-                DebugLog($"[IconExtractor.ExtractIconFromFile] 无法提取关联图标");
-                return null;
-            }
-
-            var bitmapImage = IconToBitmapImage(icon);
-            DebugLog($"[IconExtractor.ExtractIconFromFile] 成功: {bitmapImage != null}");
-            return bitmapImage;
         }
         catch (Exception ex)
         {
-            DebugLog($"[IconExtractor.ExtractIconFromFile] 异常: {ex.Message}");
+            DebugLog($"[IconExtractor.ExtractIconFromFile] ExtractIconExW 异常: {ex.Message}");
+        }
+
+        // ③ ExtractIcon (shell32)
+        try
+        {
+            IntPtr h = ExtractIcon(IntPtr.Zero, filePath, 0);
+            if (h != IntPtr.Zero)
+            {
+                try
+                {
+                    using var icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(h).Clone();
+                    var bmp = IconToBitmapImage(icon);
+                    if (bmp != null)
+                    {
+                        DebugLog("[IconExtractor.ExtractIconFromFile] shell32.ExtractIcon 成功");
+                        return bmp;
+                    }
+                }
+                finally
+                {
+                    DestroyIcon(h);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            DebugLog($"[IconExtractor.ExtractIconFromFile] shell32.ExtractIcon 异常: {ex.Message}");
+        }
+
+        // ④ GDI+ 最后兜底
+        try
+        {
+            using var icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+            if (icon != null)
+            {
+                var bmp = IconToBitmapImage(icon);
+                if (bmp != null)
+                {
+                    DebugLog("[IconExtractor.ExtractIconFromFile] GDI+ ExtractAssociatedIcon 成功");
+                    return bmp;
+                }
+            }
+            DebugLog("[IconExtractor.ExtractIconFromFile] GDI+ 拿不到，回退到 Initials");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            DebugLog($"[IconExtractor.ExtractIconFromFile] GDI+ 异常: {ex.Message}");
             return null;
         }
     }

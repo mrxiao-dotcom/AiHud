@@ -745,17 +745,27 @@ public partial class AppMarketWindow : Window
                     var mainVm = TryGetMainViewModel();
                     if (mainVm != null)
                     {
-                        // 在所有分类中查找同名应用并更新其 exe 路径
+                        // 在所有分类中查找同名应用并更新其 exe 路径 / 提取的图标
+                        // 重要：如果 existingItem.IconPath 已经有值（用户手动换过），
+                        // 一定不要覆盖；如果它是 null（新安装还没图标），
+                        // 用本次下载保存的 icon.png 补上。
+                        string? newIconPath = result.AppItem?.IconPath;
                         foreach (var cat in mainVm.Categories)
                         {
-                            var existingItem = cat.AppItems.FirstOrDefault(
-                                a => string.Equals(a.Name, result.AppItem?.Name, StringComparison.OrdinalIgnoreCase));
-                            if (existingItem != null)
+                            foreach (var existingItem in cat.AppItems.Where(
+                                a => string.Equals(a.Name, result.AppItem?.Name, StringComparison.OrdinalIgnoreCase)).ToList())
                             {
-                                // 更新 exe 路径（虽然路径相同，但确保 marker 正确）
                                 existingItem.ExecutablePath = result.AppItem!.ExecutablePath;
-                                Log($"Updated existing app '{existingItem.Name}' executable path");
-                                break;
+                                if (string.IsNullOrEmpty(existingItem.IconPath) && !string.IsNullOrEmpty(newIconPath))
+                                {
+                                    existingItem.IconPath = newIconPath;
+                                    existingItem.SetIcon(IconExtractor.LoadIconFile(newIconPath));
+                                    Log($"[升级补图标] '{existingItem.Name}' 之前无图标，已设置 IconPath={newIconPath}");
+                                }
+                                else
+                                {
+                                    Log($"Updated existing app '{existingItem.Name}' in category '{cat.Name}' (IconPath preserved)");
+                                }
                             }
                         }
                         await mainVm.SaveDataAsync();
@@ -774,10 +784,30 @@ public partial class AppMarketWindow : Window
             }
             else
             {
-                // 新下载场景：自动添加到"最新下载"分类
+                // 新下载场景：自动添加到"最新下载"分类。
+                // 但要先做一次"去重检查"——避免升级判断漏判时
+                // （例如市场端改了压缩包名但其实是同一应用），
+                // 同一应用在"最新下载"里出现两个 AppItem、一个带原图标、一个带系统默认。
                 var category = GetOrCreateLatestDownloadCategory();
-                category.AppItems.Add(result.AppItem);
-                Log($"Added app '{result.AppItem.Name}' to category '{category.Name}'. AppItems.Count={category.AppItems.Count}");
+                var existingInCategory = category.AppItems.FirstOrDefault(
+                    a => string.Equals(a.Name, result.AppItem!.Name, StringComparison.OrdinalIgnoreCase));
+                if (existingInCategory != null)
+                {
+                    // 已有同名 → 转成"原地升级"：更新 exe 路径、保留/补全 IconPath
+                    existingInCategory.ExecutablePath = result.AppItem!.ExecutablePath;
+                    if (string.IsNullOrEmpty(existingInCategory.IconPath) && !string.IsNullOrEmpty(result.AppItem.IconPath))
+                    {
+                        existingInCategory.IconPath = result.AppItem.IconPath;
+                        existingInCategory.SetIcon(IconExtractor.LoadIconFile(result.AppItem.IconPath));
+                        Log($"[去重+补图标] '{result.AppItem.Name}' 之前无图标，已设置");
+                    }
+                    Log($"[去重] '{result.AppItem.Name}' 已存在于最新下载，保留原图标仅更新 exe 路径");
+                }
+                else
+                {
+                    category.AppItems.Add(result.AppItem);
+                    Log($"Added app '{result.AppItem.Name}' to category '{category.Name}'. AppItems.Count={category.AppItems.Count}");
+                }
                 await SaveDataAsync();
 
                 // 主动把主窗口切到"最新下载"分类，让用户立刻能看到
