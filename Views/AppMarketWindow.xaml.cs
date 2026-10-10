@@ -75,9 +75,21 @@ public partial class AppMarketWindow : Window
     private async void AppMarketWindow_Loaded(object sender, RoutedEventArgs e)
     {
         Loaded -= AppMarketWindow_Loaded;
+        await InitializeAsync();
+    }
+
+    /// <summary>
+    /// 初始化 WebView2 并加载市场。可重入——"重新检测"按钮会再次调用。
+    ///   1) HttpClient 探测目标 URL
+    ///   2) 探测 WebView2 Runtime（找不到时弹引导窗）
+    ///   3) 创建 CoreWebView2Environment + EnsureCoreWebView2Async
+    ///   4) CoreWebView2 初始化完成时由事件驱动导航（避免与 Source 属性的竞态）
+    /// </summary>
+    private async Task InitializeAsync()
+    {
         try
         {
-            Log($"Loaded. url='{_pendingUrl}'");
+            Log($"Initialize start. url='{_pendingUrl}'");
 
             // ★ 启动前先用 HttpClient 直连一次目标地址：先做轻量 HTTP 探测，
             //   若目标站点连 TCP/HEAD 都不通，就别浪费用户时间等 WebView2 报 ConnectionAborted。
@@ -96,10 +108,29 @@ public partial class AppMarketWindow : Window
             var runtimePath = TryDetectWebView2RuntimePath();
             if (string.IsNullOrEmpty(runtimePath))
             {
-                Log("WebView2 Runtime not detected.");
-                throw new FileNotFoundException(
-                    "未检测到 WebView2 Runtime",
-                    @"Microsoft Edge WebView2 Runtime");
+                Log("WebView2 Runtime not detected. Showing install guide dialog.");
+                // 给用户一个可操作的引导，而不是冷冰冰的一行字
+                var dlg = new WebView2MissingDialog { Owner = this };
+                dlg.ShowDialog();
+                if (dlg.IsResolved)
+                {
+                    // 用户点了"重新检测"且这次找到了
+                    runtimePath = TryDetectWebView2RuntimePath();
+                    if (string.IsNullOrEmpty(runtimePath))
+                    {
+                        TxtStatus.Text = "WebView2 仍未检测到，请完成安装后重试。";
+                        StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CloudOffOutline;
+                        StatusIcon.Foreground = System.Windows.Media.Brushes.IndianRed;
+                        return;
+                    }
+                }
+                else
+                {
+                    TxtStatus.Text = "加载失败：WebView2 运行时未安装（已打开安装引导）";
+                    StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Download;
+                    StatusIcon.Foreground = System.Windows.Media.Brushes.Orange;
+                    return;
+                }
             }
             Log($"WebView2 Runtime: {runtimePath}");
 
@@ -114,8 +145,51 @@ public partial class AppMarketWindow : Window
         }
         catch (Exception ex)
         {
-            Log("Loaded error: " + ex);
+            Log("Initialize error: " + ex);
             TxtStatus.Text = "加载失败：" + FriendlyHint(ex);
+            StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CloudOffOutline;
+            StatusIcon.Foreground = System.Windows.Media.Brushes.IndianRed;
+        }
+    }
+
+    /// <summary>
+    /// "重新检测"按钮：用于 WebView2 装好后手动触发重新初始化。
+    /// 不会重复弹引导窗——如果还是没装好就静默回到原状态。
+    /// </summary>
+    private async void BtnRetry_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Log("BtnRetry clicked. Re-running detection + init.");
+            var runtimePath = TryDetectWebView2RuntimePath();
+            if (string.IsNullOrEmpty(runtimePath))
+            {
+                TxtStatus.Text = "WebView2 仍未检测到，请先完成安装。";
+                return;
+            }
+
+            // 重新走 InitializeAsync 的后半段（跳过引导窗）
+            TxtStatus.Text = "正在重新加载市场…";
+            StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CloudSyncOutline;
+            StatusIcon.Foreground = System.Windows.Media.Brushes.SkyBlue;
+
+            var userDataDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AiHUD", "WebView2");
+            Directory.CreateDirectory(userDataDir);
+            ClearLockFiles(userDataDir);
+
+            var env = await CoreWebView2Environment.CreateAsync(
+                browserExecutableFolder: null,
+                userDataFolder: userDataDir,
+                options: null);
+            await WebView.EnsureCoreWebView2Async(env);
+            Log("BtnRetry: EnsureCoreWebView2Async done.");
+        }
+        catch (Exception ex)
+        {
+            Log("BtnRetry error: " + ex);
+            TxtStatus.Text = "重试失败：" + FriendlyHint(ex);
             StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CloudOffOutline;
             StatusIcon.Foreground = System.Windows.Media.Brushes.IndianRed;
         }
@@ -130,6 +204,8 @@ public partial class AppMarketWindow : Window
         try
         {
             // 1) 注册表查询 Evergreen 版本（标准安装路径）
+            //    Edge 实际写的是 location 字段；老版本可能写 path。pv 是版本号字符串（如 "153.0.4234.48"），
+            //    不能当路径用。新版 EdgeWebView 会在 <location>\<pv>\msedgewebview2.exe 这种子目录里放 exe。
             //    HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}
             const string evergreenClientGuid = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}";
             string[] regPaths =
@@ -142,26 +218,41 @@ public partial class AppMarketWindow : Window
                 try
                 {
                     using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(sub);
-                    var pv = key?.GetValue("pv") as string;
-                    if (!string.IsNullOrWhiteSpace(pv) && Directory.Exists(pv) && File.Exists(Path.Combine(pv, "msedgewebview2.exe")))
-                        return pv;
-                    var path = key?.GetValue("path") as string;
-                    if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path) && File.Exists(Path.Combine(path, "msedgewebview2.exe")))
-                        return path;
+                    if (key == null) continue;
+
+                    // Edge 现代版本写的是 location（指向 Application 目录）
+                    var location = key.GetValue("location") as string;
+                    if (ResolveWebView2Exe(location, out var exeFromReg))
+                        return Path.GetDirectoryName(exeFromReg);
+
+                    // 老版本可能写 path（可能是完整 exe 路径或目录）
+                    var path = key.GetValue("path") as string;
+                    if (ResolveWebView2Exe(path, out exeFromReg))
+                        return Path.GetDirectoryName(exeFromReg);
                 }
                 catch { /* HKLM 子键不存在/无权限，继续尝试下一个 */ }
             }
 
-            // 2) 兜底：直接猜常见安装路径
-            string[] commonPaths =
+            // 2) 兜底：扫描常见安装目录里的 <version>\msedgewebview2.exe
+            //    注意 Application 目录本身没有 exe，必须进版本号子目录。
+            string[] roots =
             {
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Microsoft", "EdgeWebView", "Application"),
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Microsoft", "EdgeWebView", "Application"),
             };
-            foreach (var p in commonPaths)
+            foreach (var root in roots)
             {
-                if (Directory.Exists(p) && File.Exists(Path.Combine(p, "msedgewebview2.exe")))
-                    return p;
+                if (!Directory.Exists(root)) continue;
+                // 遍历版本号子目录（如 153.0.4234.48），找到 msedgewebview2.exe
+                try
+                {
+                    foreach (var sub in Directory.GetDirectories(root))
+                    {
+                        var exe = Path.Combine(sub, "msedgewebview2.exe");
+                        if (File.Exists(exe)) return sub; // ★ 返回版本号子目录
+                    }
+                }
+                catch { /* 单个目录扫不动就跳过 */ }
             }
 
             // 3) 最后：尝试启动 msedgewebview2.exe --version 探测 PATH
@@ -189,6 +280,39 @@ public partial class AppMarketWindow : Window
         catch
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// 把注册表读到的"目录"或"完整 exe 路径"归一化，验证里面真的有 msedgewebview2.exe。
+    /// EdgeWebView Application 目录下没有 exe，必须进版本号子目录。
+    /// </summary>
+    private static bool ResolveWebView2Exe(string? raw, out string exePath)
+    {
+        exePath = string.Empty;
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+        try
+        {
+            // raw 可能是完整 exe 路径
+            if (File.Exists(raw) && raw.EndsWith("msedgewebview2.exe", StringComparison.OrdinalIgnoreCase))
+            {
+                exePath = raw;
+                return true;
+            }
+            // raw 是 Application 目录
+            if (Directory.Exists(raw))
+            {
+                foreach (var sub in Directory.GetDirectories(raw))
+                {
+                    var exe = Path.Combine(sub, "msedgewebview2.exe");
+                    if (File.Exists(exe)) { exePath = exe; return true; }
+                }
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
         }
     }
 

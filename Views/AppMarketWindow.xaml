@@ -84,10 +84,19 @@
                     <Button x:Name="BtnRefresh"
                             ToolTip="刷新"
                             Style="{DynamicResource NeuroIconButton}"
-                            Margin="0,0,14,0"
+                            Margin="0,0,8,0"
                             Click="BtnRefresh_Click"
                             Width="40" Height="40">
                         <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"
+                                                 Foreground="{DynamicResource NeuroTextBrush}"/>
+                    </Button>
+                    <Button x:Name="BtnRetry"
+                            ToolTip="WebView2 装好后点这里重新检测"
+                            Style="{DynamicResource NeuroIconButton}"
+                            Margin="0,0,14,0"
+                            Click="BtnRetry_Click"
+                            Width="40" Height="40">
+                        <materialDesign:PackIcon Kind="RestartAlert" Width="18" Height="18"
                                                  Foreground="{DynamicResource NeuroTextBrush}"/>
                     </Button>
                     <Button x:Name="BtnClose"
